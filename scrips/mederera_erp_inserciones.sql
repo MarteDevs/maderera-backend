@@ -215,3 +215,22 @@ SELECT
     END
 FROM productos p
 JOIN medidas m ON p.id_medida = m.id_medida;
+
+
+
+
+-- Inserta clasificaciones típicas para postes en minería peruana
+INSERT INTO clasificaciones (nombre, descripcion, activo) VALUES
+('1ª Calidad', 'Poste premium: recto, sin grietas profundas, nudos pequeños y sanos, diámetro uniforme, ideal para sostenimiento principal en galerías y cruces críticos. Generalmente eucalipto o pino tratado CCA.', 1),
+
+('2ª Calidad', 'Buena calidad: permite nudos medianos, ligeras curvaturas o defectos superficiales no estructurales. Apto para sostenimientos secundarios, refuerzos y zonas de menor carga.', 1),
+
+('3ª Calidad / Recuperación', 'Postes con defectos visibles (nudos grandes, rajaduras moderadas, algo de conicidad irregular). Usado en zonas de bajo riesgo, refuerzos temporales o como "mixto" en lotes.', 1),
+
+('Mixto / Variado', 'Lote heterogéneo con mezcla de 1ª, 2ª y recuperación. Común en compras al por mayor sin selección estricta. Requiere inspección adicional al recibir.', 1),
+
+('Rechazado / No Apto', 'Postes con defectos graves (torcedura excesiva, pudrición incipiente, grietas profundas, diámetro insuficiente). No se usan en minería; devolución o uso alternativo (leña, etc.).', 1),
+
+('Tratado CCA Premium', 'Poste impregnado con sales CCA (Cobre-Cromo-Arsénico) de alta calidad. Mayor durabilidad (10+ años), resistente a hongos e insectos. Preferido en minas húmedas.', 1),
+
+('Sin Tratar / Natural', 'Poste en estado natural, sin impregnación. Vida útil más corta (3-6 años según condiciones). Más económico, pero requiere rotación frecuente.', 1);

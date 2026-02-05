@@ -18,7 +18,7 @@ USE db_maderera_erp;
 CREATE TABLE clasificaciones (
     id_clasificacion INT AUTO_INCREMENT PRIMARY KEY,
     nombre       VARCHAR(50) NOT NULL COMMENT '1ª calidad, 2ª, Recuperación, Mixto, etc.',
-    descripcion  VARCHAR(150) NULL,
+    descripcion  TEXT NULL COMMENT 'Descripción detallada de la clasificación',
     activo       BOOLEAN DEFAULT TRUE,
     deleted_at   DATETIME NULL COMMENT 'Soft delete',
     UNIQUE KEY uk_nombre_clasif (nombre)
@@ -379,7 +379,7 @@ SELECT
     ms.cantidad,
     ms.observacion,
     ms.usuario_registro,
-    v.codigo AS codigo_viaje,
+    CONCAT(req.codigo, '-V', v.numero_viaje) AS codigo_viaje,
     req.codigo AS codigo_requerimiento
 FROM movimientos_stock ms
 JOIN productos p ON ms.id_producto = p.id_producto
