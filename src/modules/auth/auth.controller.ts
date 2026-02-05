@@ -51,7 +51,7 @@ export class AuthController {
         }
     }
 
-    async logout(req: Request, res: Response) {
+    async logout(_req: Request, res: Response) {
         // En una implementación completa, aquí se invalidaría el token en Redis
         res.json({
             status: 'success',

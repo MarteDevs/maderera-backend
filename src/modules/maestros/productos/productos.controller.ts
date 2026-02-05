@@ -1,7 +1,7 @@
 import { Request, Response, NextFunction } from 'express';
 import { ProductosService } from './productos.service';
 import { createProductoSchema, updateProductoSchema, queryProductoSchema } from './productos.schemas';
-import { AuthRequest } from '../../../../middlewares/auth.middleware';
+import { AuthRequest } from '../../../middlewares/auth.middleware';
 
 const productosService = new ProductosService();
 

@@ -54,12 +54,7 @@ export class MinasService {
     }
 
     async create(data: CreateMinaInput) {
-        const existing = await prisma.minas.findUnique({
-            where: { nombre: data.nombre },
-        }); // Aunque deleted_at no es null, el nombre es unique key en BD, asi que cuidado
-        // El unique key uk_nombre_mina no chequea deleted_at, así que si reciclas nombre puede fallar.
-        // Deberíamos chequear si existe y está borrada para reactivarla o cambiar nombre.
-        // Para simplificar, asumimos que intenta crear nuevo.
+
 
         return await prisma.minas.create({
             data,

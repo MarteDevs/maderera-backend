@@ -10,7 +10,7 @@ export interface AuthRequest extends Request {
     };
 }
 
-export const authenticate = (req: AuthRequest, res: Response, next: NextFunction) => {
+export const authenticate = (req: AuthRequest, _res: Response, next: NextFunction) => {
     try {
         const authHeader = req.headers.authorization;
 
@@ -35,7 +35,7 @@ export const authenticate = (req: AuthRequest, res: Response, next: NextFunction
 };
 
 export const authorize = (...roles: string[]) => {
-    return (req: AuthRequest, res: Response, next: NextFunction) => {
+    return (req: AuthRequest, _res: Response, next: NextFunction) => {
         if (!req.user) {
             return next(new AppError(401, 'No autenticado'));
         }

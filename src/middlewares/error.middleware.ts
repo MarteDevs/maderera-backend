@@ -14,7 +14,7 @@ export class AppError extends Error {
 
 export const errorHandler = (
     err: Error | AppError | ZodError,
-    req: Request,
+    _req: Request,
     res: Response,
     _next: NextFunction
 ) => {
@@ -48,7 +48,7 @@ export const errorHandler = (
 
     // Error no manejado
     console.error('❌ Error no manejado:', err);
-    res.status(500).json({
+    return res.status(500).json({
         status: 'error',
         message: process.env.NODE_ENV === 'development' ? err.message : 'Error interno del servidor',
     });
