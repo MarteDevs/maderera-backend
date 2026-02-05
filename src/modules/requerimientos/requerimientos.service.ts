@@ -148,4 +148,42 @@ export class RequerimientosService {
             }
         });
     }
+    async getProgress(id: number) {
+        const requerimiento = await this.getById(id);
+        const detalles = requerimiento.requerimiento_detalles;
+
+        if (!detalles || detalles.length === 0) {
+            return { porcentaje: 0, detalles: [] };
+        }
+
+        let totalSolicitado = 0;
+        let totalEntregado = 0;
+
+        const progresoDetalles = detalles.map(det => {
+            const solicitado = det.cantidad_solicitada;
+            const entregado = det.cantidad_entregada || 0;
+            totalSolicitado += solicitado;
+            totalEntregado += entregado;
+
+            return {
+                id_producto: det.id_producto,
+                producto: det.productos.nombre,
+                solicitado,
+                entregado,
+                porcentaje: Math.min(100, Math.round((entregado / solicitado) * 100))
+            };
+        });
+
+        const porcentajeTotal = totalSolicitado > 0
+            ? Math.min(100, Math.round((totalEntregado / totalSolicitado) * 100))
+            : 0;
+
+        return {
+            id_requerimiento: id,
+            codigo: requerimiento.codigo,
+            estado: requerimiento.estado,
+            porcentaje_total: porcentajeTotal,
+            detalles: progresoDetalles
+        };
+    }
 }

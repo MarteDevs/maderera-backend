@@ -80,4 +80,17 @@ export class RequerimientosController {
             next(error);
         }
     }
+    async getProgress(req: Request, res: Response, next: NextFunction) {
+        try {
+            const id = parseInt(req.params.id);
+            const result = await requerimientosService.getProgress(id);
+
+            res.json({
+                status: 'success',
+                data: result,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

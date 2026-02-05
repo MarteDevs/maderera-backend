@@ -12,5 +12,6 @@ router.get('/', controller.getAll.bind(controller));
 router.get('/:id', controller.getById.bind(controller));
 router.put('/:id', controller.update.bind(controller));
 router.patch('/:id/status', controller.updateStatus.bind(controller));
+router.get('/:id/progress', controller.getProgress.bind(controller));
 
 export default router;
