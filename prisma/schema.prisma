@@ -1,0 +1,336 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model auditoria {
+  id_auditoria    Int              @id @default(autoincrement())
+  tabla           String           @db.VarChar(80)
+  id_registro     Int
+  accion          auditoria_accion
+  usuario         String           @db.VarChar(80)
+  fecha           DateTime?        @default(now()) @db.DateTime(0)
+  valores_antes   String?          @db.Text
+  valores_despues String?          @db.Text
+  ip_address      String?          @db.VarChar(45)
+
+  @@index([tabla, fecha(sort: Desc)], map: "idx_aud_tabla_fecha")
+  @@index([usuario], map: "idx_aud_usuario")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model clasificaciones {
+  id_clasificacion Int         @id @default(autoincrement())
+  nombre           String      @unique(map: "uk_nombre_clasif") @db.VarChar(50)
+  descripcion      String?     @db.Text
+  activo           Boolean?    @default(true)
+  deleted_at       DateTime?   @db.DateTime(0)
+  productos        productos[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model medidas {
+  id_medida       Int         @id @default(autoincrement())
+  descripcion     String      @unique(map: "uk_descripcion_med") @db.VarChar(100)
+  largo_mts       Decimal?    @db.Decimal(6, 3)
+  diametro_min_cm Decimal?    @db.Decimal(5, 2)
+  diametro_max_cm Decimal?    @db.Decimal(5, 2)
+  deleted_at      DateTime?   @db.DateTime(0)
+  productos       productos[]
+}
+
+model minas {
+  id_mina        Int              @id @default(autoincrement())
+  nombre         String           @unique(map: "uk_nombre_mina") @db.VarChar(100)
+  razon_social   String?          @db.VarChar(150)
+  ruc            String?          @db.VarChar(20)
+  ubicacion      String?          @db.VarChar(150)
+  contacto       String?          @db.VarChar(100)
+  deleted_at     DateTime?        @db.DateTime(0)
+  requerimientos requerimientos[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model movimientos_stock {
+  id_movimiento          Int                     @id @default(autoincrement())
+  id_producto            Int
+  tipo                   movimientos_stock_tipo
+  cantidad               Int
+  id_viaje               Int?
+  id_requerimiento       Int?
+  id_detalle_req         Int?
+  fecha                  DateTime?               @default(now()) @db.DateTime(0)
+  usuario_registro       String?                 @db.VarChar(80)
+  observacion            String?                 @db.VarChar(250)
+  created_at             DateTime?               @default(now()) @db.DateTime(0)
+  updated_at             DateTime?               @default(now()) @db.DateTime(0)
+  created_by             String?                 @db.VarChar(80)
+  updated_by             String?                 @db.VarChar(80)
+  requerimiento_detalles requerimiento_detalles? @relation(fields: [id_detalle_req], references: [id_detalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_det")
+  productos              productos               @relation(fields: [id_producto], references: [id_producto], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_prod")
+  requerimientos         requerimientos?         @relation(fields: [id_requerimiento], references: [id_requerimiento], onUpdate: NoAction, map: "fk_mov_req")
+  viajes                 viajes?                 @relation(fields: [id_viaje], references: [id_viaje], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_via")
+
+  @@index([id_detalle_req], map: "fk_mov_det")
+  @@index([id_requerimiento], map: "fk_mov_req")
+  @@index([id_producto, fecha(sort: Desc)], map: "idx_mov_prod_fecha")
+  @@index([tipo], map: "idx_mov_tipo")
+  @@index([id_viaje], map: "idx_mov_viaje")
+}
+
+model password_history {
+  id_history    Int       @id @default(autoincrement())
+  id_usuario    Int
+  password_hash String    @db.VarChar(255)
+  fecha_cambio  DateTime? @default(now()) @db.DateTime(0)
+  usuarios      usuarios  @relation(fields: [id_usuario], references: [id_usuario], onDelete: NoAction, onUpdate: NoAction, map: "fk_passhist_user")
+
+  @@index([id_usuario, fecha_cambio(sort: Desc)], map: "idx_hist_user")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model precio_historico {
+  id_historico         Int                  @id @default(autoincrement())
+  id_catalogo          Int
+  precio_anterior      Decimal              @db.Decimal(10, 2)
+  precio_nuevo         Decimal              @db.Decimal(10, 2)
+  fecha_cambio         DateTime?            @default(now()) @db.DateTime(0)
+  usuario_cambio       String?              @db.VarChar(80)
+  producto_proveedores producto_proveedores @relation(fields: [id_catalogo], references: [id_catalogo], onDelete: NoAction, onUpdate: NoAction, map: "fk_hist_cat")
+
+  @@index([id_catalogo, fecha_cambio(sort: Desc)], map: "idx_hist_fecha")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model producto_proveedores {
+  id_catalogo            Int                @id @default(autoincrement())
+  id_proveedor           Int
+  id_producto            Int
+  precio_compra_sugerido Decimal            @db.Decimal(10, 2)
+  fecha_actualizacion    DateTime?          @default(now()) @db.DateTime(0)
+  activo                 Boolean?           @default(true)
+  created_at             DateTime?          @default(now()) @db.DateTime(0)
+  updated_at             DateTime?          @default(now()) @db.DateTime(0)
+  created_by             String?            @db.VarChar(80)
+  updated_by             String?            @db.VarChar(80)
+  deleted_at             DateTime?          @db.DateTime(0)
+  precio_historico       precio_historico[]
+  productos              productos          @relation(fields: [id_producto], references: [id_producto], onDelete: NoAction, onUpdate: NoAction, map: "fk_cat_prod")
+  proveedores            proveedores        @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_cat_prov")
+
+  @@unique([id_proveedor, id_producto], map: "uk_prod_prov_unique")
+  @@index([id_producto], map: "fk_cat_prod")
+  @@index([id_proveedor, activo], map: "idx_cat_proveedor")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model productos {
+  id_producto            Int                      @id @default(autoincrement())
+  nombre                 String                   @db.VarChar(80)
+  id_medida              Int
+  id_clasificacion       Int?
+  precio_venta_base      Decimal?                 @default(0.00) @db.Decimal(10, 2)
+  stock_actual           Int?                     @default(0)
+  observaciones          String?                  @db.VarChar(250)
+  created_at             DateTime?                @default(now()) @db.DateTime(0)
+  updated_at             DateTime?                @default(now()) @db.DateTime(0)
+  created_by             String?                  @db.VarChar(80)
+  updated_by             String?                  @db.VarChar(80)
+  deleted_at             DateTime?                @db.DateTime(0)
+  movimientos_stock      movimientos_stock[]
+  producto_proveedores   producto_proveedores[]
+  clasificaciones        clasificaciones?         @relation(fields: [id_clasificacion], references: [id_clasificacion], onDelete: NoAction, onUpdate: NoAction, map: "fk_prod_clasificacion")
+  medidas                medidas                  @relation(fields: [id_medida], references: [id_medida], onDelete: NoAction, onUpdate: NoAction, map: "fk_prod_medida")
+  requerimiento_detalles requerimiento_detalles[]
+
+  @@index([id_clasificacion], map: "fk_prod_clasificacion")
+  @@index([id_medida], map: "fk_prod_medida")
+  @@index([nombre], map: "idx_prod_nombre")
+  @@index([stock_actual], map: "idx_prod_stock")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model proveedores {
+  id_proveedor         Int                    @id @default(autoincrement())
+  nombre               String                 @unique(map: "uk_nombre_prov") @db.VarChar(120)
+  razon_social         String?                @db.VarChar(150)
+  ruc                  String?                @db.VarChar(20)
+  contacto             String?                @db.VarChar(100)
+  telefono             String?                @db.VarChar(20)
+  deleted_at           DateTime?              @db.DateTime(0)
+  producto_proveedores producto_proveedores[]
+  requerimientos       requerimientos[]
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model requerimiento_detalles {
+  id_detalle          Int                 @id @default(autoincrement())
+  id_requerimiento    Int
+  id_producto         Int
+  cantidad_solicitada Int
+  cantidad_entregada  Int?                @default(0)
+  unidad_medida       String?             @default("UND") @db.VarChar(20)
+  precio_proveedor    Decimal             @db.Decimal(10, 2)
+  precio_mina         Decimal             @db.Decimal(10, 2)
+  observacion         String?             @db.VarChar(250)
+  created_at          DateTime?           @default(now()) @db.DateTime(0)
+  updated_at          DateTime?           @default(now()) @db.DateTime(0)
+  created_by          String?             @db.VarChar(80)
+  updated_by          String?             @db.VarChar(80)
+  movimientos_stock   movimientos_stock[]
+  productos           productos           @relation(fields: [id_producto], references: [id_producto], onDelete: NoAction, onUpdate: NoAction, map: "fk_det_prod")
+  requerimientos      requerimientos      @relation(fields: [id_requerimiento], references: [id_requerimiento], onDelete: Cascade, onUpdate: NoAction, map: "fk_det_req")
+  viaje_detalles      viaje_detalles[]
+
+  @@index([id_producto], map: "idx_det_producto")
+  @@index([id_requerimiento], map: "idx_det_req")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model requerimientos {
+  id_requerimiento       Int                      @id @default(autoincrement())
+  codigo                 String                   @unique(map: "codigo") @db.VarChar(20)
+  fecha_emision          DateTime?                @default(now()) @db.DateTime(0)
+  fecha_prometida        DateTime?                @db.Date
+  id_proveedor           Int
+  id_mina                Int
+  id_supervisor          Int
+  estado                 requerimientos_estado?   @default(PENDIENTE)
+  observaciones          String?                  @db.Text
+  motivo_anulacion       String?                  @db.Text
+  created_at             DateTime?                @default(now()) @db.DateTime(0)
+  updated_at             DateTime?                @default(now()) @db.DateTime(0)
+  created_by             String?                  @db.VarChar(80)
+  updated_by             String?                  @db.VarChar(80)
+  deleted_at             DateTime?                @db.DateTime(0)
+  movimientos_stock      movimientos_stock[]
+  requerimiento_detalles requerimiento_detalles[]
+  minas                  minas                    @relation(fields: [id_mina], references: [id_mina], onDelete: NoAction, onUpdate: NoAction, map: "fk_req_mina")
+  proveedores            proveedores              @relation(fields: [id_proveedor], references: [id_proveedor], onDelete: NoAction, onUpdate: NoAction, map: "fk_req_prov")
+  supervisores           supervisores             @relation(fields: [id_supervisor], references: [id_supervisor], onDelete: NoAction, onUpdate: NoAction, map: "fk_req_sup")
+  viajes                 viajes[]
+
+  @@index([id_supervisor], map: "fk_req_sup")
+  @@index([estado], map: "idx_req_estado")
+  @@index([estado, fecha_emision(sort: Desc)], map: "idx_req_estado_fecha")
+  @@index([fecha_emision(sort: Desc)], map: "idx_req_fecha")
+  @@index([id_mina], map: "idx_req_mina")
+  @@index([id_proveedor], map: "idx_req_proveedor")
+}
+
+model supervisores {
+  id_supervisor  Int              @id @default(autoincrement())
+  nombre         String           @unique(map: "uk_nombre_sup") @db.VarChar(100)
+  telefono       String?          @db.VarChar(20)
+  email          String?          @db.VarChar(120)
+  deleted_at     DateTime?        @db.DateTime(0)
+  requerimientos requerimientos[]
+  usuarios       usuarios[]
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model usuarios {
+  id_usuario        Int                @id @default(autoincrement())
+  username          String             @unique(map: "username") @db.VarChar(50)
+  password_hash     String             @db.VarChar(255)
+  nombre_completo   String             @db.VarChar(100)
+  rol               usuarios_rol?      @default(SUPERVISOR)
+  activo            Boolean?           @default(true)
+  id_supervisor     Int?
+  ultimo_login      DateTime?          @db.DateTime(0)
+  intentos_fallidos Int?               @default(0)
+  bloqueado_hasta   DateTime?          @db.DateTime(0)
+  created_at        DateTime?          @default(now()) @db.DateTime(0)
+  updated_at        DateTime?          @default(now()) @db.DateTime(0)
+  password_history  password_history[]
+  supervisores      supervisores?      @relation(fields: [id_supervisor], references: [id_supervisor], onDelete: NoAction, onUpdate: NoAction, map: "fk_usu_sup")
+
+  @@index([id_supervisor], map: "fk_usu_sup")
+  @@index([activo], map: "idx_usuario_activo")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model viaje_detalles {
+  id_viaje_detalle         Int                            @id @default(autoincrement())
+  id_viaje                 Int
+  id_detalle_requerimiento Int
+  cantidad_recibida        Int
+  estado_entrega           viaje_detalles_estado_entrega? @default(OK)
+  observacion              String?                        @db.VarChar(250)
+  created_at               DateTime?                      @default(now()) @db.DateTime(0)
+  updated_at               DateTime?                      @default(now()) @db.DateTime(0)
+  created_by               String?                        @db.VarChar(80)
+  updated_by               String?                        @db.VarChar(80)
+  requerimiento_detalles   requerimiento_detalles         @relation(fields: [id_detalle_requerimiento], references: [id_detalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_vdet_det")
+  viajes                   viajes                         @relation(fields: [id_viaje], references: [id_viaje], onDelete: Cascade, onUpdate: NoAction, map: "fk_vdet_via")
+
+  @@index([id_detalle_requerimiento], map: "fk_vdet_det")
+  @@index([id_viaje], map: "idx_vdet_viaje")
+}
+
+model viajes {
+  id_viaje          Int                 @id @default(autoincrement())
+  id_requerimiento  Int
+  numero_viaje      Int
+  fecha_salida      DateTime?           @db.DateTime(0)
+  fecha_ingreso     DateTime?           @default(now()) @db.DateTime(0)
+  placa_vehiculo    String?             @db.VarChar(20)
+  conductor         String?             @db.VarChar(100)
+  observaciones     String?             @db.Text
+  created_at        DateTime?           @default(now()) @db.DateTime(0)
+  updated_at        DateTime?           @default(now()) @db.DateTime(0)
+  created_by        String?             @db.VarChar(80)
+  updated_by        String?             @db.VarChar(80)
+  movimientos_stock movimientos_stock[]
+  viaje_detalles    viaje_detalles[]
+  requerimientos    requerimientos      @relation(fields: [id_requerimiento], references: [id_requerimiento], onDelete: Cascade, onUpdate: NoAction, map: "fk_via_req")
+
+  @@unique([id_requerimiento, numero_viaje], map: "uk_viaje_req_num")
+  @@index([fecha_ingreso(sort: Desc)], map: "idx_viaje_fecha")
+}
+
+enum movimientos_stock_tipo {
+  ENTRADA
+  SALIDA
+  AJUSTE_POS
+  AJUSTE_NEG
+  DEVOLUCION
+  AJUSTE_MANUAL
+}
+
+enum auditoria_accion {
+  INSERT
+  UPDATE
+  DELETE
+}
+
+enum usuarios_rol {
+  ADMIN
+  LOGISTICA
+  SUPERVISOR
+  MINA
+}
+
+enum viaje_detalles_estado_entrega {
+  OK
+  RECHAZADO
+  PARCIAL
+  MUESTRA
+  DA_ADO    @map("DAÑADO")
+}
+
+enum requerimientos_estado {
+  PENDIENTE
+  PARCIAL
+  COMPLETADO
+  ANULADO
+  RECHAZADO
+}
