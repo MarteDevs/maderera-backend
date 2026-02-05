@@ -11,6 +11,7 @@ import proveedoresRoutes from './modules/maestros/proveedores/proveedores.routes
 import minasRoutes from './modules/maestros/minas/minas.routes';
 import supervisoresRoutes from './modules/maestros/supervisores/supervisores.routes';
 import preciosRoutes from './modules/maestros/precios/precios.routes';
+import requerimientosRoutes from './modules/requerimientos/requerimientos.routes';
 
 const app: Application = express();
 
@@ -50,6 +51,7 @@ app.use('/api/providers', proveedoresRoutes);
 app.use('/api/mines', minasRoutes);
 app.use('/api/supervisors', supervisoresRoutes);
 app.use('/api/prices', preciosRoutes);
+app.use('/api/requirements', requerimientosRoutes);
 
 // Ruta 404
 app.use((_req, res) => {
