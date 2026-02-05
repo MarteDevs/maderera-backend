@@ -1,0 +1,30 @@
+FAIL tests/integration/auth.routes.test.ts
+  Auth Routes
+    POST /api/auth/login
+      ├ù should return tokens on success (58 ms)
+      ÔêÜ should return 401 on invalid user (7 ms)
+
+  ÔùÅ Auth Routes ÔÇ║ POST /api/auth/login ÔÇ║ should return tokens on success
+
+    expect(received).toHaveProperty(path)
+
+    Expected path: "accessToken"
+    Received path: []
+
+    Received value: {"data": {"accessToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sIjoiQURNSU4iLCJpYXQiOjE3NzAzMTk2MjQsImV4cCI6MTc3MDMyMDUyNH0.5VJofKoc7yZmHZs2HhoQU1fi1IKmvOmAfyRlQdC4I48", "refreshToken": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpZF91c3VhcmlvIjoxLCJ1c2VybmFtZSI6ImFkbWluIiwicm9sIjoiQURNSU4iLCJpYXQiOjE3NzAzMTk2MjQsImV4cCI6MTc3MDkyNDQyNH0.UoSjs_BJydE0Ska0-6O40sohiScO6rI74P-JZHWlOkU", "user": {"id": 1, "rol": "ADMIN", "username": "admin"}}, "status": "success"}
+
+      61 |
+      62 |             expect(res.status).toBe(200);
+    > 63 |             expect(res.body).toHaveProperty('accessToken');
+         |                              ^
+      64 |             expect(res.body).toHaveProperty('refreshToken');
+      65 |         });
+      66 |
+
+      at Object.<anonymous> (tests/integration/auth.routes.test.ts:63:30)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        1.887 s, estimated 2 s
+Ran all test suites matching /tests\\integration\\auth.routes.test.ts/i.

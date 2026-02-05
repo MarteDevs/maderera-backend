@@ -1,0 +1,28 @@
+FAIL tests/integration/auth.routes.test.ts
+  Auth Routes
+    POST /api/auth/login
+      ├ù should return tokens on success (44 ms)
+      ÔêÜ should return 401 on invalid user (6 ms)
+
+  ÔùÅ Auth Routes ÔÇ║ POST /api/auth/login ÔÇ║ should return tokens on success
+
+    expect(received).toBe(expected) // Object.is equality
+
+    Expected: 200
+    Received: 500
+
+      45 |                 .send({ username: 'admin', password: 'password' });
+      46 |
+    > 47 |             expect(res.status).toBe(200);
+         |                                ^
+      48 |             expect(res.body).toHaveProperty('accessToken');
+      49 |             expect(res.body).toHaveProperty('refreshToken');
+      50 |         });
+
+      at Object.<anonymous> (tests/integration/auth.routes.test.ts:47:32)
+
+Test Suites: 1 failed, 1 total
+Tests:       1 failed, 1 passed, 2 total
+Snapshots:   0 total
+Time:        1.793 s, estimated 3 s
+Ran all test suites matching /tests\\integration\\auth.routes.test.ts/i.

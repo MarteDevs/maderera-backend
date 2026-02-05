@@ -1,7 +1,7 @@
 import prisma from '../../config/database';
 import { CreateRequerimientoInput, UpdateRequerimientoInput, UpdateEstadoInput } from './requerimientos.schemas';
 import { AppError } from '../../middlewares/error.middleware';
-import { Prisma } from '@prisma/client';
+
 
 export class RequerimientosService {
     async create(data: CreateRequerimientoInput, userId?: number) {
