@@ -1,0 +1,212 @@
+openapi: 3.0.0
+info:
+  title: Madera ERP API
+  description: Backend API for Madera ERP system (Requerimientos, Viajes, Inventario)
+  version: 1.0.0
+servers:
+  - url: http://localhost:3000/api
+    description: Local Development Server
+
+components:
+  securitySchemes:
+    bearerAuth:
+      type: http
+      scheme: bearer
+      bearerFormat: JWT
+
+  schemas:
+    LoginRequest:
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          example: admin
+        password:
+          type: string
+          example: password
+
+    RequerimientoNew:
+      type: object
+      required:
+        - id_proveedor
+        - id_mina
+        - id_supervisor
+        - detalles
+      properties:
+        id_proveedor:
+          type: integer
+        id_mina:
+          type: integer
+        id_supervisor:
+          type: integer
+        observaciones:
+          type: string
+        fecha_prometida:
+          type: string
+          format: date
+        detalles:
+          type: array
+          items:
+            type: object
+            required: [id_producto, cantidad_solicitada]
+            properties:
+              id_producto:
+                type: integer
+              cantidad_solicitada:
+                type: integer
+              precio_proveedor:
+                type: number
+              precio_mina:
+                type: number
+
+    ViajeNew:
+      type: object
+      required:
+        - id_requerimiento
+        - numero_viaje
+        - vehiculo
+        - conductor
+        - detalles
+      properties:
+        id_requerimiento:
+          type: integer
+        numero_viaje:
+          type: integer
+        placa_vehiculo:
+          type: string
+        conductor:
+          type: string
+        observaciones:
+          type: string
+        detalles:
+          type: array
+          items:
+            type: object
+            required: [id_detalle_requerimiento, cantidad_recibida]
+            properties:
+              id_detalle_requerimiento:
+                type: integer
+              cantidad_recibida:
+                type: integer
+              estado_entrega:
+                type: string
+                enum: [OK, RECHAZADO, PARCIAL, MUESTRA, DA_ADO]
+
+paths:
+  /auth/login:
+    post:
+      summary: Login user
+      tags: [Auth]
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/LoginRequest'
+      responses:
+        200:
+          description: OK - Returns Access Token
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  data:
+                    type: object
+                    properties:
+                      accessToken:
+                        type: string
+
+  /requirements:
+    get:
+      summary: List requirements
+      tags: [Requerimientos]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: List of requirements
+    post:
+      summary: Create new requirement
+      tags: [Requerimientos]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/RequerimientoNew'
+      responses:
+        201:
+          description: Created
+
+  /trips:
+    post:
+      summary: Register shipment (Viaje)
+      tags: [Viajes]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/ViajeNew'
+      responses:
+        201:
+          description: Created
+
+  /inventory:
+    get:
+      summary: Get current stock
+      tags: [Inventario]
+      security:
+        - bearerAuth: []
+      responses:
+        200:
+          description: Current stock list
+
+  /inventory/kardex:
+    get:
+      summary: Get movement history
+      tags: [Inventario]
+      security:
+        - bearerAuth: []
+      parameters:
+        - in: query
+          name: id_producto
+          schema:
+            type: integer
+        - in: query
+          name: limit
+          schema:
+            type: integer
+      responses:
+        200:
+          description: Kardex entries
+
+  /inventory/adjust:
+    post:
+      summary: Manual stock adjustment
+      tags: [Inventario]
+      security:
+        - bearerAuth: []
+      requestBody:
+        content:
+          application/json:
+            schema:
+              type: object
+              required: [id_producto, cantidad, tipo_movimiento]
+              properties:
+                id_producto:
+                  type: integer
+                cantidad:
+                  type: integer
+                tipo_movimiento:
+                  type: string
+                observaciones:
+                  type: string
+      responses:
+        200:
+          description: Adjustment processed

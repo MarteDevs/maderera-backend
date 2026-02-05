@@ -14,6 +14,8 @@ import preciosRoutes from './modules/maestros/precios/precios.routes';
 import requerimientosRoutes from './modules/requerimientos/requerimientos.routes';
 import viajesRoutes from './modules/viajes/viajes.routes';
 import inventarioRoutes from './modules/inventario/inventario.routes';
+import swaggerUi from 'swagger-ui-express';
+import swaggerDocument from './config/swagger';
 
 const app: Application = express();
 
@@ -56,6 +58,7 @@ app.use('/api/prices', preciosRoutes);
 app.use('/api/requirements', requerimientosRoutes);
 app.use('/api/trips', viajesRoutes);
 app.use('/api/inventory', inventarioRoutes);
+app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
 // Ruta 404
 app.use((_req, res) => {
