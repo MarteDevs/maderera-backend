@@ -6,6 +6,11 @@ import { errorHandler } from './middlewares/error.middleware';
 
 // Importar rutas (se agregarán progresivamente)
 import authRoutes from './modules/auth/auth.routes';
+import productosRoutes from './modules/maestros/productos/productos.routes';
+import proveedoresRoutes from './modules/maestros/proveedores/proveedores.routes';
+import minasRoutes from './modules/maestros/minas/minas.routes';
+import supervisoresRoutes from './modules/maestros/supervisores/supervisores.routes';
+import preciosRoutes from './modules/maestros/precios/precios.routes';
 
 const app: Application = express();
 
@@ -40,6 +45,11 @@ app.get('/health', (_req, res) => {
 
 // Rutas de API
 app.use('/api/auth', authRoutes);
+app.use('/api/products', productosRoutes);
+app.use('/api/providers', proveedoresRoutes);
+app.use('/api/mines', minasRoutes);
+app.use('/api/supervisors', supervisoresRoutes);
+app.use('/api/prices', preciosRoutes);
 
 // Ruta 404
 app.use((_req, res) => {
