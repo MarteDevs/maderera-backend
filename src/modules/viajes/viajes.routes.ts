@@ -12,6 +12,6 @@ router.get('/:id', controller.getById.bind(controller));
 router.get('/requerimiento/:id_requerimiento', controller.getByRequerimiento.bind(controller));
 
 // Opcional: Ruta para listar viajes con filtros si fuera necesario en el futuro
-// router.get('/', controller.getAll.bind(controller));
+router.get('/', controller.getAll.bind(controller));
 
 export default router;

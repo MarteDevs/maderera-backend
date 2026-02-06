@@ -56,4 +56,19 @@ export class ViajesController {
             next(error);
         }
     }
+    async getAll(req: Request, res: Response, next: NextFunction) {
+        try {
+            const page = parseInt(req.query.page as string) || 1;
+            const limit = parseInt(req.query.limit as string) || 20;
+
+            const result = await viajesService.getAll(page, limit);
+
+            res.json({
+                status: 'success',
+                data: result
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

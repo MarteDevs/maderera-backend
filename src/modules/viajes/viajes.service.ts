@@ -3,6 +3,36 @@ import { CreateViajeInput } from './viajes.schemas';
 import { AppError } from '../../middlewares/error.middleware';
 
 export class ViajesService {
+    async getAll(page: number, limit: number) {
+        const skip = (page - 1) * limit;
+        const [viajes, total] = await Promise.all([
+            prisma.viajes.findMany({
+                skip,
+                take: limit,
+                orderBy: { fecha_ingreso: 'desc' },
+                include: {
+                    requerimientos: {
+                        select: {
+                            codigo: true,
+                            proveedores: { select: { nombre: true } }
+                        }
+                    }
+                }
+            }),
+            prisma.viajes.count()
+        ]);
+
+        return {
+            data: viajes,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
+        };
+    }
+
     async create(data: CreateViajeInput, _userId?: number, username?: string) {
         return await prisma.$transaction(async (tx) => {
             // 1. Validar Requerimiento
