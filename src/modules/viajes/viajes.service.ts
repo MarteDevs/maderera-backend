@@ -16,6 +16,15 @@ export class ViajesService {
                             codigo: true,
                             proveedores: { select: { nombre: true } }
                         }
+                    },
+                    viaje_detalles: {
+                        include: {
+                            requerimiento_detalles: {
+                                include: {
+                                    productos: true
+                                }
+                            }
+                        }
                     }
                 }
             }),
@@ -34,6 +43,7 @@ export class ViajesService {
     }
 
     async create(data: CreateViajeInput, _userId?: number, username?: string) {
+        // ... existing create logic ...
         return await prisma.$transaction(async (tx) => {
             // 1. Validar Requerimiento
             const requerimiento = await tx.requerimientos.findUnique({
@@ -48,16 +58,8 @@ export class ViajesService {
                 throw new AppError(400, 'No se pueden registrar viajes para un requerimiento ANULADO');
             }
 
-            // 2. Registrar Cabecera de Viaje usando SP
-            // sp_registrar_viaje(IN p_id_req, IN p_placa, IN p_conductor, IN p_usuario, OUT p_id_viaje)
-
-            // Preparamos las variables para el raw query
-            // Nota: Prisma raw query parameters are strictly positional or handled via binding.
-            // Para output parameters, la mejor estrategia es usar variables de sesión SQL.
-
             const usuario = username || 'system';
 
-            // Ejecutamos el CALL
             await tx.$executeRawUnsafe(
                 `CALL sp_registrar_viaje(?, ?, ?, ?, @id_viaje)`,
                 data.id_requerimiento,
@@ -66,7 +68,6 @@ export class ViajesService {
                 usuario
             );
 
-            // Recuperamos el ID generado
             const result = await tx.$queryRawUnsafe<[{ id_viaje: number }]>('SELECT @id_viaje as id_viaje');
             const idViaje = result[0]?.id_viaje;
 
@@ -74,8 +75,6 @@ export class ViajesService {
                 throw new AppError(500, 'Error al registrar el viaje en base de datos');
             }
 
-            // 3. Registrar Detalles
-            // Mapeamos los detalles para createMany
             const detallesData = data.detalles.map(det => ({
                 id_viaje: Number(idViaje),
                 id_detalle_requerimiento: det.id_detalle_requerimiento,
@@ -97,7 +96,15 @@ export class ViajesService {
         return await prisma.viajes.findMany({
             where: { id_requerimiento: idRequerimiento },
             include: {
-                viaje_detalles: true
+                viaje_detalles: {
+                    include: {
+                        requerimiento_detalles: {
+                            include: {
+                                productos: true
+                            }
+                        }
+                    }
+                }
             },
             orderBy: { numero_viaje: 'asc' }
         });
@@ -112,7 +119,15 @@ export class ViajesService {
                         proveedores: { select: { nombre: true } }
                     }
                 },
-                viaje_detalles: true
+                viaje_detalles: {
+                    include: {
+                        requerimiento_detalles: {
+                            include: {
+                                productos: true
+                            }
+                        }
+                    }
+                }
             }
         });
 
