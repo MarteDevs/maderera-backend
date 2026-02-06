@@ -60,7 +60,7 @@ app.use('/api/mines', minasRoutes);
 app.use('/api/supervisors', supervisoresRoutes);
 app.use('/api/prices', preciosRoutes);
 app.use('/api/requirements', requerimientosRoutes);
-app.use('/api/trips', viajesRoutes);
+app.use('/api/viajes', viajesRoutes);
 app.use('/api/inventory', inventarioRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
