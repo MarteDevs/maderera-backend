@@ -11,6 +11,8 @@ import proveedoresRoutes from './modules/maestros/proveedores/proveedores.routes
 import minasRoutes from './modules/maestros/minas/minas.routes';
 import supervisoresRoutes from './modules/maestros/supervisores/supervisores.routes';
 import preciosRoutes from './modules/maestros/precios/precios.routes';
+import medidasRoutes from './modules/maestros/medidas/medidas.routes';
+import clasificacionesRoutes from './modules/maestros/clasificaciones/clasificaciones.routes';
 import requerimientosRoutes from './modules/requerimientos/requerimientos.routes';
 import viajesRoutes from './modules/viajes/viajes.routes';
 import inventarioRoutes from './modules/inventario/inventario.routes';
@@ -51,6 +53,8 @@ app.get('/health', (_req, res) => {
 // Rutas de API
 app.use('/api/auth', authRoutes);
 app.use('/api/products', productosRoutes);
+app.use('/api/products/medidas', medidasRoutes);
+app.use('/api/products/clasificaciones', clasificacionesRoutes);
 app.use('/api/providers', proveedoresRoutes);
 app.use('/api/mines', minasRoutes);
 app.use('/api/supervisors', supervisoresRoutes);
