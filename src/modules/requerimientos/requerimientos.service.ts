@@ -76,7 +76,16 @@ export class RequerimientosService {
                     proveedores: { select: { nombre: true } },
                     minas: { select: { nombre: true } },
                     supervisores: { select: { nombre: true } },
-                    _count: { select: { requerimiento_detalles: true } }
+                    _count: { select: { requerimiento_detalles: true } },
+                    requerimiento_detalles: {
+                        include: {
+                            productos: {
+                                include: {
+                                    medidas: true
+                                }
+                            }
+                        }
+                    }
                 }
             })
         ]);
