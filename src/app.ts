@@ -52,9 +52,9 @@ app.get('/health', (_req, res) => {
 
 // Rutas de API
 app.use('/api/auth', authRoutes);
-app.use('/api/products', productosRoutes);
 app.use('/api/products/medidas', medidasRoutes);
 app.use('/api/products/clasificaciones', clasificacionesRoutes);
+app.use('/api/products', productosRoutes);
 app.use('/api/providers', proveedoresRoutes);
 app.use('/api/mines', minasRoutes);
 app.use('/api/supervisors', supervisoresRoutes);

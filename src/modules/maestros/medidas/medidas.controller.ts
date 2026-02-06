@@ -13,6 +13,7 @@ export class MedidasController {
                 data: medidas,
             });
         } catch (error) {
+            console.error('🔥 CRITICAL ERROR IN MEDIDAS CONTROLLER:', error);
             next(error);
         }
     }

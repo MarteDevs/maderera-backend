@@ -13,6 +13,7 @@ export class ClasificacionesController {
                 data: clasificaciones,
             });
         } catch (error) {
+            console.error('🔥 CRITICAL ERROR IN CLASIFICACIONES CONTROLLER:', error);
             next(error);
         }
     }
