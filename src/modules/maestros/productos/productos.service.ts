@@ -76,7 +76,7 @@ export class ProductosService {
     }
 
     async create(data: CreateProductoInput & { proveedores?: any[] }, userId: number | undefined) {
-        // const username = userId ? (await prisma.usuarios.findUnique({ where: { id_usuario: userId } }))?.username : 'system';
+        const username = userId ? (await prisma.usuarios.findUnique({ where: { id_usuario: userId } }))?.username : 'system';
         const proveedores = data.proveedores || [];
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { proveedores: _, ...productoData } = data;
@@ -85,8 +85,8 @@ export class ProductosService {
             const producto = await tx.productos.create({
                 data: {
                     ...productoData,
-                    created_by: 'system', // TODO: Fix username retrieval
-                    updated_by: 'system',
+                    created_by: username,
+                    updated_by: username,
                 },
             });
 
@@ -107,7 +107,7 @@ export class ProductosService {
     async update(id: number, data: UpdateProductoInput & { proveedores?: any[] }, userId: number | undefined) {
         await this.getById(id); // Verifica existencia
 
-        // const username = userId ? (await prisma.usuarios.findUnique({ where: { id_usuario: userId } }))?.username : 'system';
+        const username = userId ? (await prisma.usuarios.findUnique({ where: { id_usuario: userId } }))?.username : 'system';
         const proveedores = data.proveedores;
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { proveedores: _, ...productoData } = data;
@@ -118,7 +118,7 @@ export class ProductosService {
                 data: {
                     ...productoData,
                     updated_at: new Date(),
-                    updated_by: 'system', // TODO: Fix username retrieval
+                    updated_by: username,
                 },
             });
 
@@ -147,7 +147,7 @@ export class ProductosService {
     async delete(id: number, userId: number | undefined) {
         await this.getById(id);
 
-        // const username = userId ? (await prisma.usuarios.findUnique({ where: { id_usuario: userId } }))?.username : 'system';
+        const username = userId ? (await prisma.usuarios.findUnique({ where: { id_usuario: userId } }))?.username : 'system';
 
         // Soft delete
         return await prisma.productos.update({
@@ -155,7 +155,7 @@ export class ProductosService {
             data: {
                 deleted_at: new Date(),
                 updated_at: new Date(),
-                updated_by: 'system', // TODO: Fix username
+                updated_by: username,
             },
         });
     }
