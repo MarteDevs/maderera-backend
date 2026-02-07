@@ -7,6 +7,12 @@ export const createProductoSchema = z.object({
     precio_venta_base: z.number().min(0).optional().default(0),
     stock_actual: z.number().int().min(0).optional().default(0),
     observaciones: z.string().max(250).optional(),
+    proveedores: z.array(
+        z.object({
+            id_proveedor: z.number().int().positive(),
+            precio_compra_sugerido: z.number().min(0)
+        })
+    ).optional()
 });
 
 export const updateProductoSchema = createProductoSchema.partial();
