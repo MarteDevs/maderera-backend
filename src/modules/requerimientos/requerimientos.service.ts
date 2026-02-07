@@ -47,7 +47,9 @@ export class RequerimientosService {
         });
     }
 
-    async getAll(page: number, limit: number, filters: any) {
+    async getAll(filters: any) {
+        const page = Number(filters.page) || 1;
+        const limit = Number(filters.limit) || 10;
         const skip = (page - 1) * limit;
 
         const where: any = {
@@ -55,6 +57,7 @@ export class RequerimientosService {
         };
 
         if (filters.id_proveedor) where.id_proveedor = filters.id_proveedor;
+        if (filters.id_mina) where.id_mina = filters.id_mina;
         if (filters.estado) where.estado = filters.estado;
         if (filters.search) where.codigo = { contains: filters.search };
 

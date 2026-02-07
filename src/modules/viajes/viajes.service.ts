@@ -1,12 +1,48 @@
 import prisma from '../../config/database';
-import { CreateViajeInput } from './viajes.schemas';
+import { CreateViajeInput, QueryViajeInput } from './viajes.schemas';
 import { AppError } from '../../middlewares/error.middleware';
 
 export class ViajesService {
-    async getAll(page: number, limit: number) {
+    async getAll(filters: QueryViajeInput) {
+        const page = filters.page;
+        const limit = filters.limit;
         const skip = (page - 1) * limit;
+
+        const where: any = {};
+
+        if (filters.id_requerimiento) where.id_requerimiento = filters.id_requerimiento;
+
+        // Relaciones con Requerimiento (Proveedor y Mina)
+        if (filters.id_proveedor || filters.id_mina) {
+            where.requerimientos = {};
+            if (filters.id_proveedor) where.requerimientos.id_proveedor = filters.id_proveedor;
+            if (filters.id_mina) where.requerimientos.id_mina = filters.id_mina;
+        }
+
+        // Búsqueda por texto (Placa o Conductor)
+        if (filters.search) {
+            where.OR = [
+                { placa_vehiculo: { contains: filters.search } },
+                { conductor: { contains: filters.search } }
+            ];
+        }
+
+        // Rango de Fechas
+        if (filters.fecha_inicio && filters.fecha_fin) {
+            const start = new Date(filters.fecha_inicio);
+            start.setHours(0, 0, 0, 0);
+            const end = new Date(filters.fecha_fin);
+            end.setHours(23, 59, 59, 999);
+
+            where.fecha_ingreso = {
+                gte: start,
+                lte: end
+            };
+        }
+
         const [viajes, total] = await Promise.all([
             prisma.viajes.findMany({
+                where,
                 skip,
                 take: limit,
                 orderBy: { fecha_ingreso: 'desc' },
@@ -14,7 +50,8 @@ export class ViajesService {
                     requerimientos: {
                         select: {
                             codigo: true,
-                            proveedores: { select: { nombre: true } }
+                            proveedores: { select: { nombre: true } },
+                            minas: { select: { nombre: true } } // Agregamos nombre de la mina
                         }
                     },
                     viaje_detalles: {
@@ -32,7 +69,7 @@ export class ViajesService {
                     }
                 }
             }),
-            prisma.viajes.count()
+            prisma.viajes.count({ where })
         ]);
 
         return {

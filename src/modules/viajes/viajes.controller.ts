@@ -1,6 +1,6 @@
 import { Request, Response, NextFunction } from 'express';
 import { ViajesService } from './viajes.service';
-import { createViajeSchema } from './viajes.schemas';
+import { createViajeSchema, queryViajeSchema } from './viajes.schemas';
 import { AuthRequest } from '../../middlewares/auth.middleware';
 
 const viajesService = new ViajesService();
@@ -15,13 +15,13 @@ export class ViajesController {
 
             const result = await viajesService.create(data, userId, username);
 
-            res.status(201).json({
+            return res.status(201).json({
                 status: 'success',
                 message: 'Viaje registrado exitosamente',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
 
@@ -34,12 +34,12 @@ export class ViajesController {
 
             const result = await viajesService.getByRequerimiento(idRequerimiento);
 
-            res.json({
+            return res.json({
                 status: 'success',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
 
@@ -48,27 +48,25 @@ export class ViajesController {
             const id = parseInt(req.params.id);
             const result = await viajesService.getById(id);
 
-            res.json({
+            return res.json({
                 status: 'success',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
     async getAll(req: Request, res: Response, next: NextFunction) {
         try {
-            const page = parseInt(req.query.page as string) || 1;
-            const limit = parseInt(req.query.limit as string) || 20;
+            const query = queryViajeSchema.parse(req.query);
+            const result = await viajesService.getAll(query);
 
-            const result = await viajesService.getAll(page, limit);
-
-            res.json({
+            return res.json({
                 status: 'success',
                 data: result
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
 }

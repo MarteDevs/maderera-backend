@@ -46,29 +46,53 @@ export class InventarioService {
 
     async getKardex(query: QueryKardexInput) {
         let sql = `SELECT * FROM v_kardex_completo WHERE 1=1`;
+        let countSql = `SELECT COUNT(*) as total FROM v_kardex_completo WHERE 1=1`;
         const params: any[] = [];
+        const countParams: any[] = [];
 
         if (query.id_producto) {
             sql += ` AND id_producto = ?`;
+            countSql += ` AND id_producto = ?`;
             params.push(query.id_producto);
+            countParams.push(query.id_producto);
         }
 
         if (query.fecha_inicio && query.fecha_fin) {
             sql += ` AND fecha BETWEEN ? AND ?`;
-            params.push(new Date(query.fecha_inicio), new Date(query.fecha_fin));
+            countSql += ` AND fecha BETWEEN ? AND ?`;
+            const d1 = new Date(query.fecha_inicio);
+            const d2 = new Date(query.fecha_fin);
+            params.push(d1, d2);
+            countParams.push(d1, d2);
         }
 
         if (query.tipo_movimiento) {
             sql += ` AND tipo = ?`;
+            countSql += ` AND tipo = ?`;
             params.push(query.tipo_movimiento);
+            countParams.push(query.tipo_movimiento);
         }
 
-        sql += ` ORDER BY fecha DESC, id_movimiento DESC LIMIT ?`;
-        params.push(query.limit);
+        sql += ` ORDER BY fecha DESC, id_movimiento DESC LIMIT ? OFFSET ?`;
+        const offset = (query.page - 1) * query.limit;
+        params.push(query.limit, offset);
 
-        const data = await prisma.$queryRawUnsafe(sql, ...params);
+        const [data, countResult] = await Promise.all([
+            prisma.$queryRawUnsafe(sql, ...params),
+            prisma.$queryRawUnsafe(countSql, ...countParams)
+        ]);
 
-        return data;
+        const total = Number((countResult as any[])[0]?.total || 0);
+
+        return {
+            data,
+            pagination: {
+                page: query.page,
+                limit: query.limit,
+                total,
+                totalPages: Math.ceil(total / query.limit)
+            }
+        };
     }
 
     async adjustStock(data: AdjustStockInput, _userId?: number, username?: string) {

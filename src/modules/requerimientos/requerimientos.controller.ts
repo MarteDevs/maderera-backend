@@ -11,27 +11,27 @@ export class RequerimientosController {
             const data = createRequerimientoSchema.parse(req.body);
             const result = await requerimientosService.create(data, req.user?.id_usuario);
 
-            res.status(201).json({
+            return res.status(201).json({
                 status: 'success',
                 message: 'Requerimiento creado exitosamente',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
 
     async getAll(req: Request, res: Response, next: NextFunction) {
         try {
             const query = queryRequerimientoSchema.parse(req.query);
-            const result = await requerimientosService.getAll(query.page, query.limit, query);
+            const result = await requerimientosService.getAll(query);
 
-            res.json({
+            return res.json({
                 status: 'success',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
 
@@ -40,12 +40,12 @@ export class RequerimientosController {
             const id = parseInt(req.params.id);
             const result = await requerimientosService.getById(id);
 
-            res.json({
+            return res.json({
                 status: 'success',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
 
@@ -55,13 +55,13 @@ export class RequerimientosController {
             const data = updateEstadoSchema.parse(req.body);
             const result = await requerimientosService.updateStatus(id, data, req.user?.id_usuario);
 
-            res.json({
+            return res.json({
                 status: 'success',
                 message: 'Estado actualizado exitosamente',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
 
@@ -71,13 +71,13 @@ export class RequerimientosController {
             const data = updateRequerimientoSchema.parse(req.body);
             const result = await requerimientosService.update(id, data, req.user?.id_usuario);
 
-            res.json({
+            return res.json({
                 status: 'success',
                 message: 'Requerimiento actualizado exitosamente',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
     async getProgress(req: Request, res: Response, next: NextFunction) {
@@ -85,12 +85,12 @@ export class RequerimientosController {
             const id = parseInt(req.params.id);
             const result = await requerimientosService.getProgress(id);
 
-            res.json({
+            return res.json({
                 status: 'success',
                 data: result,
             });
         } catch (error) {
-            next(error);
+            return next(error);
         }
     }
 }

@@ -13,8 +13,9 @@ export const queryKardexSchema = z.object({
     id_producto: z.string().transform((val) => parseInt(val, 10)).optional(),
     fecha_inicio: z.string().optional(),
     fecha_fin: z.string().optional(),
-    limit: z.string().transform((val) => parseInt(val, 10)).default('50'),
     tipo_movimiento: z.enum(['ENTRADA', 'SALIDA', 'AJUSTE_POS', 'AJUSTE_NEG', 'DEVOLUCION', 'AJUSTE_MANUAL']).optional(),
+    page: z.string().transform((val) => parseInt(val, 10)).default('1'),
+    limit: z.string().transform((val) => parseInt(val, 10)).default('20'),
 });
 
 export const adjustStockSchema = z.object({

@@ -20,6 +20,9 @@ export const queryViajeSchema = z.object({
     page: z.string().transform((val) => parseInt(val, 10)).default('1'),
     limit: z.string().transform((val) => parseInt(val, 10)).default('10'),
     id_requerimiento: z.string().transform((val) => parseInt(val, 10)).optional(),
+    id_proveedor: z.string().transform((val) => parseInt(val, 10)).optional(), // New
+    id_mina: z.string().transform((val) => parseInt(val, 10)).optional(), // New
+    search: z.string().optional(), // New (Placa/Conducto)
     fecha_inicio: z.string().optional(),
     fecha_fin: z.string().optional(),
 });
