@@ -9,8 +9,8 @@ export class InventarioService {
         const params: any[] = [];
 
         if (query.search) {
-            sql += ` AND (producto LIKE ? OR codigo LIKE ?)`;
-            params.push(`%${query.search}%`, `%${query.search}%`);
+            sql += ` AND (producto LIKE ?)`;
+            params.push(`%${query.search}%`);
         }
 
         if (query.id_clasificacion) {
@@ -56,16 +56,16 @@ export class InventarioService {
         }
 
         if (query.fecha_inicio && query.fecha_fin) {
-            sql += ` AND fecha_movimiento BETWEEN ? AND ?`;
+            sql += ` AND fecha BETWEEN ? AND ?`;
             params.push(new Date(query.fecha_inicio), new Date(query.fecha_fin));
         }
 
         if (query.tipo_movimiento) {
-            sql += ` AND tipo_movimiento = ?`;
+            sql += ` AND tipo = ?`;
             params.push(query.tipo_movimiento);
         }
 
-        sql += ` ORDER BY fecha_movimiento DESC, id_movimiento DESC LIMIT ?`;
+        sql += ` ORDER BY fecha DESC, id_movimiento DESC LIMIT ?`;
         params.push(query.limit);
 
         const data = await prisma.$queryRawUnsafe(sql, ...params);
