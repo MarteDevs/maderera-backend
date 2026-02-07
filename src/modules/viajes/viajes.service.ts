@@ -49,9 +49,10 @@ export class ViajesService {
     async create(data: CreateViajeInput, _userId?: number, username?: string) {
         // ... existing create logic ...
         return await prisma.$transaction(async (tx) => {
-            // 1. Validar Requerimiento
+            // 1. Validar Requerimiento y obtener sus detalles para mapear productos
             const requerimiento = await tx.requerimientos.findUnique({
-                where: { id_requerimiento: data.id_requerimiento }
+                where: { id_requerimiento: data.id_requerimiento },
+                include: { requerimiento_detalles: true }
             });
 
             if (!requerimiento) {
@@ -64,6 +65,7 @@ export class ViajesService {
 
             const usuario = username || 'system';
 
+            // Insertar Viaje usando SP (mantiene lógica de numero_viaje)
             await tx.$executeRawUnsafe(
                 `CALL sp_registrar_viaje(?, ?, ?, ?, @id_viaje)`,
                 data.id_requerimiento,
@@ -79,6 +81,7 @@ export class ViajesService {
                 throw new AppError(500, 'Error al registrar el viaje en base de datos');
             }
 
+            // Preparar datos para Viaje Detalles
             const detallesData = data.detalles.map(det => ({
                 id_viaje: Number(idViaje),
                 id_detalle_requerimiento: det.id_detalle_requerimiento,
@@ -88,11 +91,72 @@ export class ViajesService {
                 created_by: usuario
             }));
 
+            // Insertar Detalles del Viaje
             await tx.viaje_detalles.createMany({
                 data: detallesData
             });
 
-            return { id_viaje: Number(idViaje), message: 'Viaje registrado exitosamente' };
+            // 2. Insertar Movimientos de Stock (Kardex) y Actualizar Stock Actual
+            // Esto también podría disparar triggers, pero aseguramos el registro en Kardex
+            const movimientosData = [];
+
+            for (const det of data.detalles) {
+                // Buscar el id_producto correspondiente al detalle del requerimiento
+                const reqDetalle = requerimiento.requerimiento_detalles.find(rd => rd.id_detalle === det.id_detalle_requerimiento);
+
+                if (reqDetalle && det.cantidad_recibida > 0 && det.estado_entrega === 'OK') {
+                    movimientosData.push({
+                        id_producto: reqDetalle.id_producto,
+                        tipo: 'ENTRADA', // Enum hardcoded based on schemas
+                        cantidad: det.cantidad_recibida,
+                        id_viaje: Number(idViaje),
+                        id_requerimiento: data.id_requerimiento,
+                        id_detalle_req: det.id_detalle_requerimiento,
+                        observacion: `Recepción Viaje #${idViaje} - ${det.observacion || ''}`,
+                        usuario_registro: usuario,
+                        created_by: usuario
+                    });
+                }
+            }
+
+            if (movimientosData.length > 0) {
+                await tx.movimientos_stock.createMany({
+                    data: movimientosData as any // Cast to avoid strict enum typing issues if types aren't perfectly aligned
+                });
+            }
+
+            // 3. Verificar y Actualizar Estado del Requerimiento
+            // Recalcular cantidades entregadas (sumando lo actual + lo nuevo ya insertado por triggers o lógica)
+            // Nota: Los triggers en 'viaje_detalles' ya deberían haber actualizado 'cantidad_entregada' en 'requerimiento_detalles'.
+            // Consultamos de nuevo los detalles actualizados para verificar el estado global.
+
+            const reqDetallesActualizados = await tx.requerimiento_detalles.findMany({
+                where: { id_requerimiento: data.id_requerimiento }
+            });
+
+            let totalSolicitado = 0;
+            let totalEntregado = 0;
+
+            reqDetallesActualizados.forEach(d => {
+                totalSolicitado += d.cantidad_solicitada;
+                totalEntregado += (d.cantidad_entregada || 0);
+            });
+
+            let nuevoEstado = 'PARCIAL';
+            if (totalEntregado >= totalSolicitado) {
+                nuevoEstado = 'COMPLETADO';
+            } else if (totalEntregado === 0) {
+                nuevoEstado = 'PENDIENTE';
+            }
+
+            if (nuevoEstado !== requerimiento.estado) {
+                await tx.requerimientos.update({
+                    where: { id_requerimiento: data.id_requerimiento },
+                    data: { estado: nuevoEstado as any }
+                });
+            }
+
+            return { id_viaje: Number(idViaje), message: `Viaje registrado. Estado Requerimiento: ${nuevoEstado}` };
         });
     }
 
