@@ -32,12 +32,10 @@ export class InventarioService {
         // Count total for pagination (simplificado)
         // Nota: Para performance real, deberíamos hacer un COUNT(*) separado, pero por ahora...
 
-        sql += ` ORDER BY stock_actual ASC LIMIT ? OFFSET ?`;
+        sql += ` ORDER BY stock_actual DESC LIMIT ? OFFSET ?`;
         params.push(query.limit, offset);
 
         const data = await prisma.$queryRawUnsafe(sql, ...params);
-
-        // Obtenemos total aprox para paginación (Opcional, omitido para simplicidad en raw query dinámica)
 
         return {
             page: query.page,
