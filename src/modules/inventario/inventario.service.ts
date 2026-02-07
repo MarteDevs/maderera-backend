@@ -29,18 +29,44 @@ export class InventarioService {
             sql += ` AND stock_actual < 100`;
         }
 
-        // Count total for pagination (simplificado)
-        // Nota: Para performance real, deberíamos hacer un COUNT(*) separado, pero por ahora...
+        // Count total for pagination
+        let countSql = `SELECT COUNT(*) as total FROM v_stock_disponible WHERE 1=1`;
+        const countParams: any[] = [];
+
+        if (query.search) {
+            countSql += ` AND (producto LIKE ?)`;
+            countParams.push(`%${query.search}%`);
+        }
+        if (query.id_clasificacion) {
+            countSql += ` AND id_clasificacion = ?`;
+            countParams.push(query.id_clasificacion);
+        }
+        if (query.id_medida) {
+            countSql += ` AND id_medida = ?`;
+            countParams.push(query.id_medida);
+        }
+        if (query.bajo_stock) {
+            countSql += ` AND stock_actual < 100`;
+        }
 
         sql += ` ORDER BY stock_actual DESC LIMIT ? OFFSET ?`;
         params.push(query.limit, offset);
 
-        const data = await prisma.$queryRawUnsafe(sql, ...params);
+        const [data, countResult] = await Promise.all([
+            prisma.$queryRawUnsafe(sql, ...params),
+            prisma.$queryRawUnsafe(countSql, ...countParams)
+        ]);
+
+        const total = Number((countResult as any[])[0]?.total || 0);
 
         return {
-            page: query.page,
-            limit: query.limit,
-            data
+            data,
+            pagination: {
+                page: query.page,
+                limit: query.limit,
+                total,
+                totalPages: Math.ceil(total / query.limit)
+            }
         };
     }
 
