@@ -94,11 +94,13 @@ export class RequerimientosService {
         ]);
 
         return {
-            total,
-            page,
-            limit,
-            totalPages: Math.ceil(total / limit),
-            data
+            data,
+            pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit)
+            }
         };
     }
 
