@@ -16,6 +16,7 @@ import clasificacionesRoutes from './modules/maestros/clasificaciones/clasificac
 import requerimientosRoutes from './modules/requerimientos/requerimientos.routes';
 import viajesRoutes from './modules/viajes/viajes.routes';
 import inventarioRoutes from './modules/inventario/inventario.routes';
+import { usuariosRoutes } from './modules/usuarios/usuarios.routes';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './config/swagger';
 
@@ -52,6 +53,7 @@ app.get('/health', (_req, res) => {
 
 // Rutas de API
 app.use('/api/auth', authRoutes);
+app.use('/api/users', usuariosRoutes);
 app.use('/api/products/medidas', medidasRoutes);
 app.use('/api/products/clasificaciones', clasificacionesRoutes);
 app.use('/api/products', productosRoutes);
