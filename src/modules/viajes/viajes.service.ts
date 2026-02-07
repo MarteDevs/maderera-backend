@@ -21,7 +21,11 @@ export class ViajesService {
                         include: {
                             requerimiento_detalles: {
                                 include: {
-                                    productos: true
+                                    productos: {
+                                        include: {
+                                            medidas: true
+                                        }
+                                    }
                                 }
                             }
                         }
@@ -100,7 +104,11 @@ export class ViajesService {
                     include: {
                         requerimiento_detalles: {
                             include: {
-                                productos: true
+                                productos: {
+                                    include: {
+                                        medidas: true
+                                    }
+                                }
                             }
                         }
                     }
@@ -123,7 +131,11 @@ export class ViajesService {
                     include: {
                         requerimiento_detalles: {
                             include: {
-                                productos: true
+                                productos: {
+                                    include: {
+                                        medidas: true
+                                    }
+                                }
                             }
                         }
                     }
