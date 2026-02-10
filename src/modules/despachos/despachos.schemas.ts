@@ -51,8 +51,9 @@ export const queryDespachosSchema = z.object({
     estado: DespachoEstadoEnum.optional(),
     id_mina: z.string().optional().transform(val => val ? Number(val) : undefined),
     id_viaje: z.string().optional().transform(val => val ? Number(val) : undefined),
-    fecha_desde: z.string().datetime().optional(),
-    fecha_hasta: z.string().datetime().optional(),
+    // Acepta formato de fecha simple (yyyy-mm-dd) en lugar de datetime
+    fecha_desde: z.string().optional().transform(val => val || undefined),
+    fecha_hasta: z.string().optional().transform(val => val || undefined),
     search: z.string().optional()
 });
 

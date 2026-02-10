@@ -228,7 +228,7 @@ export class DespachosService {
         // Validar stock disponible
         for (const detalle of despacho.despacho_detalles) {
             const stockActual = await prisma.$queryRaw<[{ stock_actual: number }]>`
-                SELECT stock_actual FROM v_stock_actual 
+                SELECT stock_actual FROM v_stock_disponible 
                 WHERE id_producto = ${detalle.id_producto} AND id_medida = ${detalle.id_medida}
             `;
 
