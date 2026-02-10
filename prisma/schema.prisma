@@ -35,13 +35,14 @@ model clasificaciones {
 
 /// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
 model medidas {
-  id_medida       Int         @id @default(autoincrement())
-  descripcion     String      @unique(map: "uk_descripcion_med") @db.VarChar(100)
-  largo_mts       Decimal?    @db.Decimal(6, 3)
-  diametro_min_cm Decimal?    @db.Decimal(5, 2)
-  diametro_max_cm Decimal?    @db.Decimal(5, 2)
-  deleted_at      DateTime?   @db.DateTime(0)
-  productos       productos[]
+  id_medida         Int                 @id @default(autoincrement())
+  descripcion       String              @unique(map: "uk_descripcion_med") @db.VarChar(100)
+  largo_mts         Decimal?            @db.Decimal(6, 3)
+  diametro_min_cm   Decimal?            @db.Decimal(5, 2)
+  diametro_max_cm   Decimal?            @db.Decimal(5, 2)
+  deleted_at        DateTime?           @db.DateTime(0)
+  despacho_detalles despacho_detalles[]
+  productos         productos[]
 }
 
 model minas {
@@ -52,6 +53,7 @@ model minas {
   ubicacion      String?          @db.VarChar(150)
   contacto       String?          @db.VarChar(100)
   deleted_at     DateTime?        @db.DateTime(0)
+  despachos      despachos[]
   requerimientos requerimientos[]
 }
 
@@ -63,6 +65,7 @@ model movimientos_stock {
   tipo                   movimientos_stock_tipo
   cantidad               Int
   id_viaje               Int?
+  id_despacho            Int?
   id_requerimiento       Int?
   id_detalle_req         Int?
   fecha                  DateTime?               @default(now()) @db.DateTime(0)
@@ -73,6 +76,7 @@ model movimientos_stock {
   created_by             String?                 @db.VarChar(80)
   updated_by             String?                 @db.VarChar(80)
   requerimiento_detalles requerimiento_detalles? @relation(fields: [id_detalle_req], references: [id_detalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_det")
+  despachos              despachos?              @relation(fields: [id_despacho], references: [id_despacho], onUpdate: NoAction, map: "fk_mov_dsp")
   productos              productos               @relation(fields: [id_producto], references: [id_producto], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_prod")
   requerimientos         requerimientos?         @relation(fields: [id_requerimiento], references: [id_requerimiento], onUpdate: NoAction, map: "fk_mov_req")
   viajes                 viajes?                 @relation(fields: [id_viaje], references: [id_viaje], onDelete: NoAction, onUpdate: NoAction, map: "fk_mov_via")
@@ -82,6 +86,7 @@ model movimientos_stock {
   @@index([id_producto, fecha(sort: Desc)], map: "idx_mov_prod_fecha")
   @@index([tipo], map: "idx_mov_tipo")
   @@index([id_viaje], map: "idx_mov_viaje")
+  @@index([id_despacho], map: "idx_mov_despacho")
 }
 
 model password_history {
@@ -144,6 +149,7 @@ model productos {
   created_by             String?                  @db.VarChar(80)
   updated_by             String?                  @db.VarChar(80)
   deleted_at             DateTime?                @db.DateTime(0)
+  despacho_detalles      despacho_detalles[]
   movimientos_stock      movimientos_stock[]
   producto_proveedores   producto_proveedores[]
   clasificaciones        clasificaciones?         @relation(fields: [id_clasificacion], references: [id_clasificacion], onDelete: NoAction, onUpdate: NoAction, map: "fk_prod_clasificacion")
@@ -232,6 +238,7 @@ model supervisores {
   telefono       String?          @db.VarChar(20)
   email          String?          @db.VarChar(120)
   deleted_at     DateTime?        @db.DateTime(0)
+  despachos      despachos[]
   requerimientos requerimientos[]
   usuarios       usuarios[]
 }
@@ -289,12 +296,64 @@ model viajes {
   updated_at        DateTime?           @default(now()) @db.DateTime(0)
   created_by        String?             @db.VarChar(80)
   updated_by        String?             @db.VarChar(80)
+  despachos         despachos[]
   movimientos_stock movimientos_stock[]
   viaje_detalles    viaje_detalles[]
   requerimientos    requerimientos      @relation(fields: [id_requerimiento], references: [id_requerimiento], onDelete: Cascade, onUpdate: NoAction, map: "fk_via_req")
 
   @@unique([id_requerimiento, numero_viaje], map: "uk_viaje_req_num")
   @@index([fecha_ingreso(sort: Desc)], map: "idx_viaje_fecha")
+}
+
+/// This table contains check constraints and requires additional setup for migrations. Visit https://pris.ly/d/check-constraints for more info.
+model despacho_detalles {
+  id_despacho_detalle Int       @id @default(autoincrement())
+  id_despacho         Int
+  id_producto         Int
+  id_medida           Int
+  cantidad_despachada Int
+  observacion         String?   @db.VarChar(250)
+  created_at          DateTime? @default(now()) @db.DateTime(0)
+  updated_at          DateTime? @default(now()) @db.DateTime(0)
+  created_by          String?   @db.VarChar(80)
+  updated_by          String?   @db.VarChar(80)
+  despachos           despachos @relation(fields: [id_despacho], references: [id_despacho], onDelete: Cascade, onUpdate: NoAction, map: "fk_ddet_dsp")
+  medidas             medidas   @relation(fields: [id_medida], references: [id_medida], onDelete: NoAction, onUpdate: NoAction, map: "fk_ddet_med")
+  productos           productos @relation(fields: [id_producto], references: [id_producto], onDelete: NoAction, onUpdate: NoAction, map: "fk_ddet_prod")
+
+  @@index([id_medida], map: "fk_ddet_med")
+  @@index([id_despacho], map: "idx_ddet_despacho")
+  @@index([id_producto], map: "idx_ddet_producto")
+}
+
+/// This model or at least one of its fields has comments in the database, and requires an additional setup for migrations: Read more: https://pris.ly/d/database-comments
+model despachos {
+  id_despacho       Int                 @id @default(autoincrement())
+  codigo            String              @unique(map: "codigo") @db.VarChar(20)
+  fecha_creacion    DateTime?           @default(now()) @db.DateTime(0)
+  fecha_salida      DateTime?           @db.DateTime(0)
+  fecha_entrega     DateTime?           @db.DateTime(0)
+  id_mina           Int
+  id_supervisor     Int?
+  id_viaje          Int?
+  estado            despachos_estado?   @default(PREPARANDO)
+  observaciones     String?             @db.Text
+  motivo_anulacion  String?             @db.Text
+  created_at        DateTime?           @default(now()) @db.DateTime(0)
+  updated_at        DateTime?           @default(now()) @db.DateTime(0)
+  created_by        String?             @db.VarChar(80)
+  updated_by        String?             @db.VarChar(80)
+  despacho_detalles despacho_detalles[]
+  minas             minas               @relation(fields: [id_mina], references: [id_mina], onDelete: NoAction, onUpdate: NoAction, map: "fk_dsp_mina")
+  supervisores      supervisores?       @relation(fields: [id_supervisor], references: [id_supervisor], onDelete: NoAction, onUpdate: NoAction, map: "fk_dsp_sup")
+  viajes            viajes?             @relation(fields: [id_viaje], references: [id_viaje], onUpdate: NoAction, map: "fk_dsp_viaje")
+  movimientos_stock movimientos_stock[]
+
+  @@index([id_supervisor], map: "fk_dsp_sup")
+  @@index([estado], map: "idx_dsp_estado")
+  @@index([fecha_creacion(sort: Desc)], map: "idx_dsp_fecha")
+  @@index([id_mina], map: "idx_dsp_mina")
+  @@index([id_viaje], map: "idx_dsp_viaje")
 }
 
 enum movimientos_stock_tipo {
@@ -333,4 +392,11 @@ enum requerimientos_estado {
   COMPLETADO
   ANULADO
   RECHAZADO
+}
+
+enum despachos_estado {
+  PREPARANDO
+  EN_TRANSITO
+  ENTREGADO
+  ANULADO
 }
