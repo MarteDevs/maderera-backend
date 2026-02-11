@@ -19,6 +19,10 @@ export class DespachosService {
         if (estado) where.estado = estado;
         if (id_mina) where.id_mina = id_mina;
         if (id_viaje) where.id_viaje = id_viaje;
+        // Filtrar por requerimiento a través de viaje
+        if (query.id_requerimiento) {
+            where.viajes = { id_requerimiento: query.id_requerimiento };
+        }
 
         if (fecha_desde || fecha_hasta) {
             where.fecha_creacion = {};
@@ -39,10 +43,35 @@ export class DespachosService {
                 include: {
                     minas: { select: { nombre: true } },
                     supervisores: { select: { nombre: true } },
-                    viajes: { select: { id_viaje: true, numero_viaje: true } },
+                    viajes: {
+                        select: {
+                            id_viaje: true,
+                            numero_viaje: true,
+                            requerimientos: {
+                                include: {
+                                    requerimiento_detalles: {
+                                        select: {
+                                            id_producto: true,
+                                            precio_proveedor: true
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
                     despacho_detalles: {
                         include: {
-                            productos: { select: { nombre: true } },
+                            productos: {
+                                select: {
+                                    nombre: true,
+                                    precio_venta_base: true,
+                                    producto_proveedores: {
+                                        select: { precio_compra_sugerido: true },
+                                        take: 1,
+                                        orderBy: { fecha_actualizacion: 'desc' }
+                                    }
+                                }
+                            },
                             medidas: { select: { descripcion: true } }
                         }
                     }
