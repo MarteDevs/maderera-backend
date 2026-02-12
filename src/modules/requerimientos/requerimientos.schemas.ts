@@ -5,6 +5,7 @@ export const createRequerimientoSchema = z.object({
     id_mina: z.number().int().positive('El ID de la mina es requerido'),
     id_supervisor: z.number().int().positive('El ID del supervisor es requerido'),
     observaciones: z.string().optional(),
+    fecha_emision: z.string().datetime().optional().or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)')).transform(val => val ? new Date(val) : undefined),
     fecha_prometida: z.string().datetime().optional().or(z.string().regex(/^\d{4}-\d{2}-\d{2}$/, 'Formato de fecha inválido (YYYY-MM-DD)')).transform(val => val ? new Date(val) : null),
     detalles: z.array(
         z.object({

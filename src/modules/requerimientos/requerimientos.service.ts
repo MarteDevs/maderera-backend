@@ -25,6 +25,7 @@ export class RequerimientosService {
                     id_mina: data.id_mina,
                     id_supervisor: data.id_supervisor,
                     observaciones: data.observaciones,
+                    fecha_emision: data.fecha_emision,
                     fecha_prometida: data.fecha_prometida,
                     created_by: userId ? String(userId) : 'system',
                     requerimiento_detalles: {
@@ -74,7 +75,7 @@ export class RequerimientosService {
                 where,
                 skip,
                 take: limit,
-                orderBy: { fecha_emision: 'desc' },
+                orderBy: { id_requerimiento: 'desc' },
                 include: {
                     proveedores: { select: { nombre: true } },
                     minas: { select: { nombre: true } },
