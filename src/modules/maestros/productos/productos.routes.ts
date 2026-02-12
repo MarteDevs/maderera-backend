@@ -10,8 +10,8 @@ router.get('/', authenticate, productosController.getAll.bind(productosControlle
 router.get('/:id', authenticate, productosController.getById.bind(productosController));
 
 // Rutas de administración
-router.post('/', authenticate, authorize('ADMIN', 'LOGISTICA'), productosController.create.bind(productosController));
-router.put('/:id', authenticate, authorize('ADMIN', 'LOGISTICA'), productosController.update.bind(productosController));
-router.delete('/:id', authenticate, authorize('ADMIN'), productosController.delete.bind(productosController));
+router.post('/', authenticate, authorize('ADMIN', 'LOGISTICA', 'SUPERVISOR'), productosController.create.bind(productosController));
+router.put('/:id', authenticate, authorize('ADMIN', 'LOGISTICA', 'SUPERVISOR'), productosController.update.bind(productosController));
+router.delete('/:id', authenticate, authorize('ADMIN', 'SUPERVISOR'), productosController.delete.bind(productosController));
 
 export default router;

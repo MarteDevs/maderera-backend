@@ -8,8 +8,8 @@ const supervisoresController = new SupervisoresController();
 router.get('/', authenticate, supervisoresController.getAll.bind(supervisoresController));
 router.get('/:id', authenticate, supervisoresController.getById.bind(supervisoresController));
 
-router.post('/', authenticate, authorize('ADMIN', 'LOGISTICA'), supervisoresController.create.bind(supervisoresController));
-router.put('/:id', authenticate, authorize('ADMIN', 'LOGISTICA'), supervisoresController.update.bind(supervisoresController));
-router.delete('/:id', authenticate, authorize('ADMIN'), supervisoresController.delete.bind(supervisoresController));
+router.post('/', authenticate, authorize('ADMIN', 'LOGISTICA', 'SUPERVISOR'), supervisoresController.create.bind(supervisoresController));
+router.put('/:id', authenticate, authorize('ADMIN', 'LOGISTICA', 'SUPERVISOR'), supervisoresController.update.bind(supervisoresController));
+router.delete('/:id', authenticate, authorize('ADMIN', 'SUPERVISOR'), supervisoresController.delete.bind(supervisoresController));
 
 export default router;
