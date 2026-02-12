@@ -31,4 +31,17 @@ export class MedidasController {
             next(error);
         }
     }
+
+    async create(req: Request, res: Response, next: NextFunction) {
+        try {
+            const medida = await medidasService.create(req.body);
+
+            res.status(201).json({
+                status: 'success',
+                data: medida,
+            });
+        } catch (error) {
+            next(error);
+        }
+    }
 }

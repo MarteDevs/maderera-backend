@@ -28,4 +28,26 @@ export class MedidasService {
 
         return medida;
     }
+
+    async create(data: { descripcion: string }) {
+        // Valida si ya existe (opcional pero recomendado)
+        const existing = await prisma.medidas.findFirst({
+            where: {
+                descripcion: data.descripcion,
+                deleted_at: null,
+            },
+        });
+
+        if (existing) {
+            throw new Error('Ya existe una medida con esta descripción');
+        }
+
+        const medida = await prisma.medidas.create({
+            data: {
+                descripcion: data.descripcion,
+            },
+        });
+
+        return medida;
+    }
 }
