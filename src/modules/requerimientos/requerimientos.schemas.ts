@@ -42,9 +42,10 @@ export const updateEstadoSchema = z.object({
 });
 
 export const queryRequerimientoSchema = z.object({
-    page: z.string().transform((val) => parseInt(val, 10)).default('1'),
-    limit: z.string().transform((val) => parseInt(val, 10)).default('10'),
-    id_proveedor: z.string().transform((val) => parseInt(val, 10)).optional(),
+    page: z.preprocess((val) => parseInt(String(val), 10), z.number().int().min(1)).default(1),
+    limit: z.preprocess((val) => parseInt(String(val), 10), z.number().int().min(1)).default(10),
+    id_proveedor: z.preprocess((val) => val ? parseInt(String(val), 10) : undefined, z.number().int().positive().optional()),
+    id_mina: z.preprocess((val) => val ? parseInt(String(val), 10) : undefined, z.number().int().positive().optional()),
     estado: z.enum(['PENDIENTE', 'PARCIAL', 'COMPLETADO', 'ANULADO', 'RECHAZADO']).optional(),
     fecha_inicio: z.string().optional(),
     fecha_fin: z.string().optional(),

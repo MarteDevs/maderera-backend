@@ -63,9 +63,12 @@ export class RequerimientosService {
         if (filters.search) where.codigo = { contains: filters.search };
 
         if (filters.fecha_inicio && filters.fecha_fin) {
+            const endDate = new Date(filters.fecha_fin);
+            endDate.setDate(endDate.getDate() + 1); // Add 1 day to include the full end date
+
             where.fecha_emision = {
                 gte: new Date(filters.fecha_inicio),
-                lte: new Date(filters.fecha_fin)
+                lt: endDate
             };
         }
 
