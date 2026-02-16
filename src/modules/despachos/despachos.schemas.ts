@@ -17,6 +17,7 @@ export const createDespachoSchema = z.object({
     id_supervisor: z.number().int().positive().optional(),
     id_viaje: z.number().int().positive().optional(),
     observaciones: z.string().optional(),
+    fecha_creacion: z.string().optional(), // Fecha manual
     detalles: z.array(despachoDetalleSchema).min(1, 'Debe incluir al menos un producto')
 });
 

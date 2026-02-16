@@ -129,14 +129,28 @@ export class DespachosService {
      * Crear un nuevo despacho en estado PREPARANDO
      */
     async create(data: CreateDespachoInput, usuario: string) {
-        // Generar código único
+        // Usar fecha proporcionada o actual
+        const fechaCreacion = data.fecha_creacion ? new Date(data.fecha_creacion) : new Date();
+        const year = fechaCreacion.getFullYear();
+
+        // Generar código único basado en el año de la fecha de creación
         const ultimoDespacho = await prisma.despachos.findFirst({
-            orderBy: { id_despacho: 'desc' },
-            select: { id_despacho: true }
+            where: {
+                codigo: { startsWith: `DSP-${year}-` }
+            },
+            orderBy: { codigo: 'desc' },
+            select: { codigo: true }
         });
 
-        const numero = (ultimoDespacho?.id_despacho || 0) + 1;
-        const codigo = `DSP-${new Date().getFullYear()}-${String(numero).padStart(4, '0')}`;
+        let numero = 1;
+        if (ultimoDespacho?.codigo) {
+            const parts = ultimoDespacho.codigo.split('-');
+            if (parts.length === 3) {
+                numero = parseInt(parts[2]) + 1;
+            }
+        }
+
+        const codigo = `DSP-${year}-${String(numero).padStart(4, '0')}`;
 
         // Crear despacho con detalles en una transacción
         const despacho = await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
@@ -147,6 +161,7 @@ export class DespachosService {
                     id_supervisor: data.id_supervisor,
                     id_viaje: data.id_viaje,
                     observaciones: data.observaciones,
+                    fecha_creacion: fechaCreacion, // Usar la fecha calculada
                     estado: 'PREPARANDO',
                     created_by: usuario
                 }
