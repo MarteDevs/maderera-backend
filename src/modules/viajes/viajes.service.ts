@@ -27,8 +27,23 @@ export class ViajesService {
             ];
         }
 
-        // Rango de Fechas
-        if (filters.fecha_inicio && filters.fecha_fin) {
+        // Filtro por Mes y Año (Prioridad sobre rango de fechas manual)
+        if (filters.mes && filters.anio) {
+            const start = new Date(filters.anio, filters.mes - 1, 1);
+            const end = new Date(filters.anio, filters.mes, 0, 23, 59, 59, 999);
+            where.fecha_ingreso = {
+                gte: start,
+                lte: end
+            };
+        } else if (filters.anio) {
+            const start = new Date(filters.anio, 0, 1);
+            const end = new Date(filters.anio, 11, 31, 23, 59, 59, 999);
+            where.fecha_ingreso = {
+                gte: start,
+                lte: end
+            };
+        } else if (filters.fecha_inicio && filters.fecha_fin) {
+            // Fallback a rango de fechas si no se especifica mes/año
             const start = new Date(filters.fecha_inicio);
             start.setHours(0, 0, 0, 0);
             const end = new Date(filters.fecha_fin);

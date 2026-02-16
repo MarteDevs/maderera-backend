@@ -22,9 +22,11 @@ export const queryViajeSchema = z.object({
     id_requerimiento: z.string().transform((val) => parseInt(val, 10)).optional(),
     id_proveedor: z.string().transform((val) => parseInt(val, 10)).optional(), // New
     id_mina: z.string().transform((val) => parseInt(val, 10)).optional(), // New
-    search: z.string().optional(), // New (Placa/Conducto)
+    search: z.string().optional(),
     fecha_inicio: z.string().optional(),
     fecha_fin: z.string().optional(),
+    mes: z.string().transform((val) => parseInt(val, 10)).optional(),
+    anio: z.string().transform((val) => parseInt(val, 10)).optional(),
 });
 
 export type CreateViajeInput = z.infer<typeof createViajeSchema>;
