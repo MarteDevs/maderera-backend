@@ -117,13 +117,14 @@ export class ViajesService {
 
             const usuario = username || 'system';
 
-            // Insertar Viaje usando SP (mantiene lógica de numero_viaje)
+            // Insertar Viaje usando SP (ahora acepta fecha_ingreso)
             await tx.$executeRawUnsafe(
-                `CALL sp_registrar_viaje(?, ?, ?, ?, @id_viaje)`,
+                `CALL sp_registrar_viaje(?, ?, ?, ?, ?, @id_viaje)`,
                 data.id_requerimiento,
                 data.placa_vehiculo,
                 data.conductor,
-                usuario
+                usuario,
+                data.fecha_ingreso ? new Date(data.fecha_ingreso) : null
             );
 
             const result = await tx.$queryRawUnsafe<[{ id_viaje: number }]>('SELECT @id_viaje as id_viaje');
@@ -132,6 +133,9 @@ export class ViajesService {
             if (!idViaje) {
                 throw new AppError(500, 'Error al registrar el viaje en base de datos');
             }
+
+            // Ya no necesitamos actualizar fecha_ingreso manualmente porque el SP lo maneja
+
 
             // Preparar datos para Viaje Detalles
             const detallesData = data.detalles.map(det => ({
