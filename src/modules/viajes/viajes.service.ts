@@ -117,12 +117,13 @@ export class ViajesService {
 
             const usuario = username || 'system';
 
-            // Insertar Viaje usando SP (ahora acepta fecha_ingreso)
+            // Insertar Viaje usando SP (ahora acepta fecha_ingreso y numero_vale)
             await tx.$executeRawUnsafe(
-                `CALL sp_registrar_viaje(?, ?, ?, ?, ?, @id_viaje)`,
+                `CALL sp_registrar_viaje(?, ?, ?, ?, ?, ?, @id_viaje)`,
                 data.id_requerimiento,
                 data.placa_vehiculo,
                 data.conductor,
+                data.numero_vale || null, // Nuevo parametro
                 usuario,
                 data.fecha_ingreso ? new Date(data.fecha_ingreso) : null
             );
