@@ -158,12 +158,56 @@ export class RequerimientosService {
             throw new AppError(400, 'Solo se pueden editar requerimientos en estado PENDIENTE');
         }
 
-        return await prisma.requerimientos.update({
-            where: { id_requerimiento: id },
-            data: {
-                ...data,
-                updated_by: userId ? String(userId) : 'system'
+        return await prisma.$transaction(async (tx) => {
+            // 1. Update Header
+            const { detalles, ...headerData } = data;
+
+            await tx.requerimientos.update({
+                where: { id_requerimiento: id },
+                data: {
+                    ...headerData,
+                    updated_by: userId ? String(userId) : 'system'
+                }
+            });
+
+            // 2. Update Details if provided (Replace Strategy)
+            if (detalles && detalles.length > 0) {
+                // Delete existing details
+                await tx.requerimiento_detalles.deleteMany({
+                    where: { id_requerimiento: id }
+                });
+
+                // Create new details
+                await tx.requerimiento_detalles.createMany({
+                    data: detalles.map(det => ({
+                        id_requerimiento: id,
+                        id_producto: det.id_producto,
+                        cantidad_solicitada: det.cantidad_solicitada,
+                        precio_proveedor: det.precio_proveedor,
+                        precio_mina: det.precio_mina,
+                        observacion: det.observacion,
+                        created_by: userId ? String(userId) : 'system'
+                    }))
+                });
             }
+
+            return await tx.requerimientos.findUnique({
+                where: { id_requerimiento: id },
+                include: {
+                    proveedores: true,
+                    minas: true,
+                    supervisores: true,
+                    requerimiento_detalles: {
+                        include: {
+                            productos: {
+                                include: {
+                                    medidas: true
+                                }
+                            }
+                        }
+                    }
+                }
+            });
         });
     }
     async getProgress(id: number) {

@@ -24,8 +24,15 @@ export const updateRequerimientoSchema = z.object({
     id_supervisor: z.number().int().positive().optional(),
     observaciones: z.string().optional(),
     fecha_prometida: z.string().transform(val => val ? new Date(val) : undefined).optional(),
-    // Nota: La actualización completa de detalles es compleja, por ahora permitimos editar cabecera
-    // Si se requiere editar detalles, se suele hacer vía endpoints específicos o reemplazo total
+    detalles: z.array(
+        z.object({
+            id_producto: z.number().int().positive('El ID del producto es requerido'),
+            cantidad_solicitada: z.number().int().positive('La cantidad debe ser mayor a 0'),
+            precio_proveedor: z.number().min(0, 'El precio no puede ser negativo'),
+            precio_mina: z.number().min(0, 'El precio no puede ser negativo'),
+            observacion: z.string().optional(),
+        })
+    ).min(1, 'Debe incluir al menos un detalle').optional(),
 });
 
 export const updateEstadoSchema = z.object({
