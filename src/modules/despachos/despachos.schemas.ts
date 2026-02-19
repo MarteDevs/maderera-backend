@@ -16,6 +16,7 @@ export const createDespachoSchema = z.object({
     id_mina: z.number().int().positive(),
     id_supervisor: z.number().int().positive().optional(),
     id_viaje: z.number().int().positive().optional(),
+    numero_vale: z.string().max(50).optional(),
     observaciones: z.string().optional(),
     fecha_creacion: z.string().optional(), // Fecha manual
     detalles: z.array(despachoDetalleSchema).min(1, 'Debe incluir al menos un producto')
@@ -26,6 +27,7 @@ export const updateDespachoSchema = z.object({
     id_mina: z.number().int().positive().optional(),
     id_supervisor: z.number().int().positive().optional(),
     id_viaje: z.number().int().positive().optional(),
+    numero_vale: z.string().max(50).optional(),
     observaciones: z.string().optional(),
     detalles: z.array(despachoDetalleSchema).min(1).optional()
 });
@@ -56,7 +58,8 @@ export const queryDespachosSchema = z.object({
     // Acepta formato de fecha simple (yyyy-mm-dd) en lugar de datetime
     fecha_desde: z.string().optional().transform(val => val || undefined),
     fecha_hasta: z.string().optional().transform(val => val || undefined),
-    search: z.string().optional()
+    search: z.string().optional(),
+    numero_vale: z.string().optional()
 });
 
 // Types exports

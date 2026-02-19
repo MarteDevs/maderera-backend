@@ -337,6 +337,7 @@ model despachos {
   id_mina           Int
   id_supervisor     Int?
   id_viaje          Int?
+  numero_vale       String?             @db.VarChar(50)
   estado            despachos_estado?   @default(PREPARANDO)
   observaciones     String?             @db.Text
   motivo_anulacion  String?             @db.Text

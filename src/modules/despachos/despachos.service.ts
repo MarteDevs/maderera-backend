@@ -160,6 +160,7 @@ export class DespachosService {
                     id_mina: data.id_mina,
                     id_supervisor: data.id_supervisor,
                     id_viaje: data.id_viaje,
+                    numero_vale: data.numero_vale,
                     observaciones: data.observaciones,
                     fecha_creacion: fechaCreacion, // Usar la fecha calculada
                     estado: 'PREPARANDO',
