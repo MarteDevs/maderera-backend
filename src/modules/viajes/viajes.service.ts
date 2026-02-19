@@ -135,8 +135,13 @@ export class ViajesService {
                 throw new AppError(500, 'Error al registrar el viaje en base de datos');
             }
 
-            // Ya no necesitamos actualizar fecha_ingreso manualmente porque el SP lo maneja
-
+            // Actualizar etiqueta_viaje si existe
+            if (data.etiqueta_viaje) {
+                await tx.viajes.update({
+                    where: { id_viaje: Number(idViaje) },
+                    data: { etiqueta_viaje: data.etiqueta_viaje }
+                });
+            }
 
             // Preparar datos para Viaje Detalles
             const detallesData = data.detalles.map(det => ({

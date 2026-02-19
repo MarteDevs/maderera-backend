@@ -5,6 +5,7 @@ export const createViajeSchema = z.object({
     placa_vehiculo: z.string().min(1, 'La placa del vehículo es requerida').max(20),
     conductor: z.string().min(1, 'El nombre del conductor es requerido').max(100),
     numero_vale: z.string().max(50, 'El número de vale no puede exceder 50 caracteres').optional(),
+    etiqueta_viaje: z.string().max(50, 'La etiqueta de viaje no puede exceder 50 caracteres').optional(),
     fecha_ingreso: z.string().datetime().optional().transform(val => val ? new Date(val) : new Date()),
     observaciones: z.string().optional(),
     detalles: z.array(
@@ -29,6 +30,7 @@ export const queryViajeSchema = z.object({
     fecha_fin: z.string().optional(),
     mes: z.string().transform((val) => parseInt(val, 10)).optional(),
     anio: z.string().transform((val) => parseInt(val, 10)).optional(),
+    etiqueta_viaje: z.string().optional(),
 });
 
 export type CreateViajeInput = z.infer<typeof createViajeSchema>;

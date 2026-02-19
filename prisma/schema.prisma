@@ -288,6 +288,7 @@ model viajes {
   id_requerimiento  Int
   numero_viaje      Int
   numero_vale       String?             @db.VarChar(50)
+  etiqueta_viaje    String?             @db.VarChar(50)
   fecha_salida      DateTime?           @db.DateTime(0)
   fecha_ingreso     DateTime?           @default(now()) @db.DateTime(0)
   placa_vehiculo    String?             @db.VarChar(20)
