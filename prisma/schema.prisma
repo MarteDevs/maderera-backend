@@ -42,6 +42,7 @@ model medidas {
   diametro_max_cm   Decimal?            @db.Decimal(5, 2)
   deleted_at        DateTime?           @db.DateTime(0)
   despacho_detalles despacho_detalles[]
+  viaje_detalles    viaje_detalles[]
   productos         productos[]
 }
 
@@ -150,6 +151,7 @@ model productos {
   updated_by             String?                  @db.VarChar(80)
   deleted_at             DateTime?                @db.DateTime(0)
   despacho_detalles      despacho_detalles[]
+  viaje_detalles         viaje_detalles[]
   movimientos_stock      movimientos_stock[]
   producto_proveedores   producto_proveedores[]
   clasificaciones        clasificaciones?         @relation(fields: [id_clasificacion], references: [id_clasificacion], onDelete: NoAction, onUpdate: NoAction, map: "fk_prod_clasificacion")
@@ -268,7 +270,10 @@ model usuarios {
 model viaje_detalles {
   id_viaje_detalle         Int                            @id @default(autoincrement())
   id_viaje                 Int
-  id_detalle_requerimiento Int
+  id_detalle_requerimiento Int?
+  es_extra                 Boolean                        @default(false)
+  id_producto              Int?
+  id_medida                Int?
   cantidad_recibida        Int
   estado_entrega           viaje_detalles_estado_entrega? @default(OK)
   observacion              String?                        @db.VarChar(250)
@@ -276,11 +281,14 @@ model viaje_detalles {
   updated_at               DateTime?                      @default(now()) @db.DateTime(0)
   created_by               String?                        @db.VarChar(80)
   updated_by               String?                        @db.VarChar(80)
-  requerimiento_detalles   requerimiento_detalles         @relation(fields: [id_detalle_requerimiento], references: [id_detalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_vdet_det")
+  requerimiento_detalles   requerimiento_detalles?        @relation(fields: [id_detalle_requerimiento], references: [id_detalle], onDelete: NoAction, onUpdate: NoAction, map: "fk_vdet_det")
   viajes                   viajes                         @relation(fields: [id_viaje], references: [id_viaje], onDelete: Cascade, onUpdate: NoAction, map: "fk_vdet_via")
+  productos                productos?                     @relation(fields: [id_producto], references: [id_producto], onDelete: NoAction, onUpdate: NoAction, map: "fk_vdet_prod")
+  medidas                  medidas?                       @relation(fields: [id_medida], references: [id_medida], onDelete: NoAction, onUpdate: NoAction, map: "fk_vdet_med")
 
   @@index([id_detalle_requerimiento], map: "fk_vdet_det")
   @@index([id_viaje], map: "idx_vdet_viaje")
+  @@index([id_producto], map: "idx_vdet_producto")
 }
 
 model viajes {

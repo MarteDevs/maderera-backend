@@ -17,7 +17,6 @@ import requerimientosRoutes from './modules/requerimientos/requerimientos.routes
 import viajesRoutes from './modules/viajes/viajes.routes';
 import inventarioRoutes from './modules/inventario/inventario.routes';
 import { usuariosRoutes } from './modules/usuarios/usuarios.routes';
-import despachosRoutes from './modules/despachos/despachos.routes';
 import reportesRoutes from './modules/reportes/reportes.routes';
 import swaggerUi from 'swagger-ui-express';
 import swaggerDocument from './config/swagger';
@@ -66,7 +65,6 @@ app.use('/api/prices', preciosRoutes);
 app.use('/api/requirements', requerimientosRoutes);
 app.use('/api/viajes', viajesRoutes);
 app.use('/api/inventory', inventarioRoutes);
-app.use('/api/despachos', despachosRoutes);
 app.use('/api/reportes', reportesRoutes);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
