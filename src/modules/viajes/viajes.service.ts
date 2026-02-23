@@ -100,8 +100,8 @@ export class ViajesService {
             await tx.$executeRawUnsafe(
                 `CALL sp_registrar_viaje(?, ?, ?, ?, ?, ?, @id_viaje)`,
                 data.id_requerimiento,
-                data.placa_vehiculo,
-                data.conductor,
+                data.placa_vehiculo || null,
+                data.conductor || null,
                 data.numero_vale || null,
                 usuario,
                 data.fecha_ingreso ? new Date(data.fecha_ingreso) : null
