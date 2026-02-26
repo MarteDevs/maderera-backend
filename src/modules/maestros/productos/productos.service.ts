@@ -1,4 +1,5 @@
 import prisma from '../../../config/database';
+import { Prisma } from '@prisma/client';
 import { CreateProductoInput, UpdateProductoInput } from './productos.schemas';
 import { AppError } from '../../../middlewares/error.middleware';
 
@@ -81,7 +82,7 @@ export class ProductosService {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { proveedores: _, ...productoData } = data;
 
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const producto = await tx.productos.create({
                 data: {
                     ...productoData,
@@ -112,7 +113,7 @@ export class ProductosService {
         // eslint-disable-next-line @typescript-eslint/no-unused-vars
         const { proveedores: _, ...productoData } = data;
 
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             const producto = await tx.productos.update({
                 where: { id_producto: id },
                 data: {

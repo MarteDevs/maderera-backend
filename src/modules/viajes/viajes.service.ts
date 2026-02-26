@@ -1,4 +1,5 @@
 import prisma from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { CreateViajeInput, QueryViajeInput } from './viajes.schemas';
 import { AppError } from '../../middlewares/error.middleware';
 
@@ -82,7 +83,7 @@ export class ViajesService {
     }
 
     async create(data: CreateViajeInput, _userId?: number, username?: string) {
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // 1. Validar Requerimiento
             const requerimiento = await tx.requerimientos.findUnique({
                 where: { id_requerimiento: data.id_requerimiento },
@@ -107,7 +108,7 @@ export class ViajesService {
                 data.fecha_ingreso ? new Date(data.fecha_ingreso) : null
             );
 
-            const result = await tx.$queryRawUnsafe<[{ id_viaje: number }]>('SELECT @id_viaje as id_viaje');
+            const result = await (tx.$queryRawUnsafe as <T>(sql: string) => Promise<T>)<[{ id_viaje: number }]>('SELECT @id_viaje as id_viaje');
             const idViaje = result[0]?.id_viaje;
 
             if (!idViaje) throw new AppError(500, 'Error al registrar el viaje en base de datos');
@@ -164,7 +165,7 @@ export class ViajesService {
             let totalSolicitado = 0;
             let totalEntregado = 0;
 
-            reqDetallesActualizados.forEach(d => {
+            reqDetallesActualizados.forEach((d: typeof reqDetallesActualizados[number]) => {
                 totalSolicitado += d.cantidad_solicitada;
                 totalEntregado += (d.cantidad_entregada || 0);
             });

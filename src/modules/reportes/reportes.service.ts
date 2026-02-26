@@ -19,7 +19,7 @@ export class ReportesService {
             }
         });
 
-        const valorInventario = stockData.reduce((acc, curr) => {
+        const valorInventario = stockData.reduce((acc: number, curr) => {
             const stock = curr.stock_actual || 0;
             const precio = Number(curr.precio_venta_base) || 0;
             return acc + (stock * precio);
@@ -43,7 +43,7 @@ export class ReportesService {
             }
         });
 
-        const gastoRequerimientos = requerimientosMes.reduce((acc, curr) => {
+        const gastoRequerimientos = requerimientosMes.reduce((acc: number, curr) => {
             return acc + (curr.cantidad_solicitada * Number(curr.precio_proveedor));
         }, 0);
 
@@ -66,7 +66,7 @@ export class ReportesService {
             }
         });
 
-        const valorDespachado = despachosMes.reduce((acc, curr) => {
+        const valorDespachado = despachosMes.reduce((acc: number, curr) => {
             const precio = Number(curr.productos.precio_venta_base) || 0;
             return acc + (curr.cantidad_despachada * precio);
         }, 0);
@@ -98,7 +98,7 @@ export class ReportesService {
         // Agrupamos por mina y sumamos el valor
         // Prisma no soporta joins complejos en groupBy facilmente, haremos una query raw o lógica en memoria
         // Para simplicidad y flexibilidad, usaremos lógica en memoria optimizada (trayendo detalles necesarios)
-        
+
         const despachos = await prisma.despacho_detalles.findMany({
             where: {
                 despachos: {
@@ -115,10 +115,10 @@ export class ReportesService {
 
         const minasMap = new Map<string, number>();
 
-        despachos.forEach(det => {
+        despachos.forEach((det: typeof despachos[number]) => {
             const minaNombre = det.despachos.minas.nombre;
             const valor = det.cantidad_despachada * Number(det.productos.precio_venta_base || 0);
-            
+
             minasMap.set(minaNombre, (minasMap.get(minaNombre) || 0) + valor);
         });
 
@@ -178,11 +178,11 @@ export class ReportesService {
         }
 
         // Sumar Gastos
-        requerimientos.forEach(req => {
+        requerimientos.forEach((req: typeof requerimientos[number]) => {
             if (!req.requerimientos.fecha_emision) return;
             const d = new Date(req.requerimientos.fecha_emision);
             const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            
+
             if (tendenciaMap.has(key)) {
                 const val = req.cantidad_solicitada * Number(req.precio_proveedor);
                 tendenciaMap.get(key)!.gastos += val;
@@ -190,11 +190,11 @@ export class ReportesService {
         });
 
         // Sumar Ventas
-        despachos.forEach(dsp => {
+        despachos.forEach((dsp: typeof despachos[number]) => {
             if (!dsp.despachos.fecha_creacion) return;
             const d = new Date(dsp.despachos.fecha_creacion);
             const key = `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}`;
-            
+
             if (tendenciaMap.has(key)) {
                 const val = dsp.cantidad_despachada * Number(dsp.productos.precio_venta_base || 0);
                 tendenciaMap.get(key)!.ventas += val;

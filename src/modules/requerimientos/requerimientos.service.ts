@@ -1,15 +1,16 @@
 import prisma from '../../config/database';
+import { Prisma } from '@prisma/client';
 import { CreateRequerimientoInput, UpdateRequerimientoInput, UpdateEstadoInput } from './requerimientos.schemas';
 import { AppError } from '../../middlewares/error.middleware';
 
 
 export class RequerimientosService {
     async create(data: CreateRequerimientoInput, userId?: number) {
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // 1. Generar código usando SP
             // Usamos queryRawUnsafe para llamar al SP y obtener variable de sesión
             await tx.$executeRawUnsafe('CALL sp_generar_codigo_requerimiento(@codigo)');
-            const result = await tx.$queryRawUnsafe<[{ codigo: string }]>('SELECT @codigo as codigo');
+            const result = await (tx.$queryRawUnsafe as <T>(sql: string) => Promise<T>)<[{ codigo: string }]>('SELECT @codigo as codigo');
 
             const nuevoCodigo = result[0]?.codigo;
 
@@ -158,7 +159,7 @@ export class RequerimientosService {
             throw new AppError(400, 'Solo se pueden editar requerimientos en estado PENDIENTE');
         }
 
-        return await prisma.$transaction(async (tx) => {
+        return await prisma.$transaction(async (tx: Prisma.TransactionClient) => {
             // 1. Update Header
             const { detalles, ...headerData } = data;
 
@@ -221,7 +222,7 @@ export class RequerimientosService {
         let totalSolicitado = 0;
         let totalEntregado = 0;
 
-        const progresoDetalles = detalles.map(det => {
+        const progresoDetalles = detalles.map((det: typeof detalles[number]) => {
             const solicitado = det.cantidad_solicitada;
             const entregado = det.cantidad_entregada || 0;
             totalSolicitado += solicitado;
