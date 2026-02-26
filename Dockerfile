@@ -1,6 +1,7 @@
 # ─── Stage 1: Build ───────────────────────────────────────────────────────────
 FROM node:22-alpine AS builder
 
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 # Instalar dependencias (incluyendo devDependencies para compilar TypeScript)
@@ -17,6 +18,7 @@ RUN npm run build
 # ─── Stage 2: Production ──────────────────────────────────────────────────────
 FROM node:22-alpine AS production
 
+RUN apk add --no-cache openssl
 WORKDIR /app
 
 ENV NODE_ENV=production
