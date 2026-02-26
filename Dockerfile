@@ -10,6 +10,8 @@ RUN npm ci
 # Copiar fuentes y compilar
 COPY tsconfig.json ./
 COPY src ./src
+COPY prisma ./prisma
+RUN npx prisma generate
 RUN npm run build
 
 # ─── Stage 2: Production ──────────────────────────────────────────────────────
