@@ -19,7 +19,7 @@ export class ReportesService {
             }
         });
 
-        const valorInventario = stockData.reduce((acc: number, curr) => {
+        const valorInventario = stockData.reduce((acc: number, curr: any) => {
             const stock = curr.stock_actual || 0;
             const precio = Number(curr.precio_venta_base) || 0;
             return acc + (stock * precio);
@@ -43,7 +43,7 @@ export class ReportesService {
             }
         });
 
-        const gastoRequerimientos = requerimientosMes.reduce((acc: number, curr) => {
+        const gastoRequerimientos = requerimientosMes.reduce((acc: number, curr: any) => {
             return acc + (curr.cantidad_solicitada * Number(curr.precio_proveedor));
         }, 0);
 
@@ -66,7 +66,7 @@ export class ReportesService {
             }
         });
 
-        const valorDespachado = despachosMes.reduce((acc: number, curr) => {
+        const valorDespachado = despachosMes.reduce((acc: number, curr: any) => {
             const precio = Number(curr.productos.precio_venta_base) || 0;
             return acc + (curr.cantidad_despachada * precio);
         }, 0);
