@@ -179,6 +179,7 @@ export class ViajesService {
                             tipo: 'ENTRADA',
                             cantidad: det.cantidad_recibida,
                             id_viaje: Number(idViaje),
+                            id_requerimiento: data.id_requerimiento,
                             usuario_registro: usuario,
                             observacion: `Ingreso por viaje ${data.numero_vale || 'S/N'}`,
                             created_by: usuario
@@ -195,6 +196,7 @@ export class ViajesService {
                         tipo: 'ENTRADA',
                         cantidad: det.cantidad_recibida,
                         id_viaje: Number(idViaje),
+                        id_requerimiento: data.id_requerimiento,
                         usuario_registro: usuario,
                         observacion: `Ingreso EXTRA por viaje ${data.numero_vale || 'S/N'}`,
                         created_by: usuario
