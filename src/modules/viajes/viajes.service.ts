@@ -162,6 +162,53 @@ export class ViajesService {
                 where: { id_requerimiento: data.id_requerimiento }
             });
 
+            // --- NUEVO: Registrar Ingresos en Kardex (movimientos_stock) ---
+            const mapProductos = new Map(
+                reqDetallesActualizados.map((d: any) => [d.id_detalle, d.id_producto])
+            );
+
+            const movimientosStockData: any[] = [];
+
+            // Entradas normales
+            detallesNormales.forEach((det: any) => {
+                if (det.estado_entrega !== 'RECHAZADO' && det.cantidad_recibida > 0) {
+                    const idProd = mapProductos.get(det.id_detalle_requerimiento);
+                    if (idProd) {
+                        movimientosStockData.push({
+                            id_producto: idProd,
+                            tipo: 'ENTRADA',
+                            cantidad: det.cantidad_recibida,
+                            id_viaje: Number(idViaje),
+                            usuario_registro: usuario,
+                            observacion: `Ingreso por viaje ${data.numero_vale || 'S/N'}`,
+                            created_by: usuario
+                        });
+                    }
+                }
+            });
+
+            // Entradas extras
+            detallesExtras.forEach((det: any) => {
+                if (det.estado_entrega !== 'RECHAZADO' && det.cantidad_recibida > 0) {
+                    movimientosStockData.push({
+                        id_producto: det.id_producto,
+                        tipo: 'ENTRADA',
+                        cantidad: det.cantidad_recibida,
+                        id_viaje: Number(idViaje),
+                        usuario_registro: usuario,
+                        observacion: `Ingreso EXTRA por viaje ${data.numero_vale || 'S/N'}`,
+                        created_by: usuario
+                    });
+                }
+            });
+
+            if (movimientosStockData.length > 0) {
+                await tx.movimientos_stock.createMany({
+                    data: movimientosStockData
+                });
+            }
+            // --- FIN NUEVO ---
+
             let totalSolicitado = 0;
             let totalEntregado = 0;
 
