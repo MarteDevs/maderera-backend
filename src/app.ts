@@ -26,9 +26,27 @@ const app: Application = express();
 
 // Middlewares de seguridad
 app.use(helmet());
+// Configuración de orígenes permitidos (separados por coma en el .env)
+const allowedOrigins = process.env.CORS_ORIGIN 
+    ? process.env.CORS_ORIGIN.split(',') 
+    : ['http://localhost:5173', 'http://localhost:8080'];
+
 app.use(
     cors({
-        origin: process.env.CORS_ORIGIN || 'http://localhost:5173',
+        origin: function (origin, callback) {
+            // Permitir peticiones sin origen (como las apps nativas de iOS/Android o Postman)
+            if (!origin) return callback(null, true);
+            
+            // Permitir comodín si está configurado así en el .env
+            if (process.env.CORS_ORIGIN === '*') return callback(null, true);
+
+            // Validar si el origen está en la lista permitida
+            if (allowedOrigins.indexOf(origin) !== -1) {
+                return callback(null, true);
+            } else {
+                return callback(new Error('Bloqueado por CORS: El origen no está permitido.'), false);
+            }
+        },
         credentials: true,
     })
 );
