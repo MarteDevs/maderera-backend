@@ -1,0 +1,50 @@
+version: '3.8'
+
+services:
+  # ----------------------------------------------------------------------
+  # Database (MySQL)
+  # ----------------------------------------------------------------------
+  mysql_db:
+    image: mysql:8.0
+    container_name: madera_mysql_local
+    platform: linux/amd64
+    ports:
+      - "3306:3306"
+    environment:
+      # Contraseña que ya tienes en tu .env local (root / marte)
+      MYSQL_ROOT_PASSWORD: marte
+      MYSQL_DATABASE: db_maderera_erp
+    volumes:
+      - mysql_data:/var/lib/mysql
+      # Script de inicialización (restauración automática)
+      - ./scrips/backup_madera_erp.sql:/docker-entrypoint-initdb.d/1-init.sql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+    restart: unless-stopped
+
+  # ----------------------------------------------------------------------
+  # Backend
+  # ----------------------------------------------------------------------
+  backend:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: madera_backend_local
+    ports:
+      - "3000:3000"
+    depends_on:
+      mysql_db:
+        condition: service_healthy
+    env_file:
+      - .env
+    environment:
+      - NODE_ENV=production
+      # Sobreescribimos la clave del .env local porque ahora el host es 'mysql_db' (la red Docker)
+      - DATABASE_URL=mysql://root:marte@mysql_db:3306/db_maderera_erp
+    restart: unless-stopped
+
+volumes:
+  mysql_data:
