@@ -18,7 +18,8 @@ export class DespachosController {
         try {
             const query = queryDespachosSchema.parse(req.query);
             const result = await despachosService.list(query);
-            res.json(result);
+            // Normalizado: mismo formato que todos los demás módulos
+            res.json({ status: 'success', data: result });
         } catch (error) {
             next(error);
         }
@@ -31,7 +32,7 @@ export class DespachosController {
         try {
             const id = parseInt(req.params.id);
             const despacho = await despachosService.getById(id);
-            res.json(despacho);
+            res.json({ status: 'success', data: despacho });
         } catch (error) {
             next(error);
         }
@@ -45,7 +46,7 @@ export class DespachosController {
             const data = createDespachoSchema.parse(req.body);
             const usuario = req.user?.username || 'sistema';
             const despacho = await despachosService.create(data, usuario);
-            res.status(201).json(despacho);
+            res.status(201).json({ status: 'success', message: 'Despacho creado exitosamente', data: despacho });
         } catch (error) {
             next(error);
         }
@@ -60,7 +61,7 @@ export class DespachosController {
             const data = updateDespachoSchema.parse(req.body);
             const usuario = req.user?.username || 'sistema';
             const despacho = await despachosService.update(id, data, usuario);
-            res.json(despacho);
+            res.json({ status: 'success', message: 'Despacho actualizado', data: despacho });
         } catch (error) {
             next(error);
         }
@@ -73,7 +74,7 @@ export class DespachosController {
         try {
             const id = parseInt(req.params.id);
             const result = await despachosService.delete(id);
-            res.json(result);
+            res.json({ status: 'success', message: result.message });
         } catch (error) {
             next(error);
         }
@@ -88,7 +89,7 @@ export class DespachosController {
             const data = transitoDespachoSchema.parse(req.body);
             const usuario = req.user?.username || 'sistema';
             const despacho = await despachosService.cambiarATransito(id, usuario, data.fecha_salida);
-            res.json(despacho);
+            res.json({ status: 'success', message: 'Despacho enviado a tránsito', data: despacho });
         } catch (error) {
             next(error);
         }
@@ -103,7 +104,7 @@ export class DespachosController {
             const data = entregarDespachoSchema.parse(req.body);
             const usuario = req.user?.username || 'sistema';
             const despacho = await despachosService.marcarEntregado(id, usuario, data.fecha_entrega);
-            res.json(despacho);
+            res.json({ status: 'success', message: 'Despacho marcado como entregado', data: despacho });
         } catch (error) {
             next(error);
         }
@@ -118,7 +119,7 @@ export class DespachosController {
             const data = anularDespachoSchema.parse(req.body);
             const usuario = req.user?.username || 'sistema';
             const despacho = await despachosService.anular(id, data, usuario);
-            res.json(despacho);
+            res.json({ status: 'success', message: 'Despacho anulado exitosamente', data: despacho });
         } catch (error) {
             next(error);
         }
